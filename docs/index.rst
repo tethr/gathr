@@ -11,3 +11,18 @@ features of `Gathr` include:
 + RESTish JSON based HTTP API.
 + Transparent, human readable data format based on `Churro
   <http://pypi.python.org/pypi/churro/>`_.
+
+Contents
+========
+
+.. toctree::
+    :maxdepth: 2
+
+    concepts
+    glossary
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
