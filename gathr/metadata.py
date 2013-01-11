@@ -3,15 +3,11 @@ import os
 import sys
 import yaml
 
-from pyramid.threadlocal import get_current_registry
-
 from churro import PersistentType
 from churro import PersistentFolder
 
 
-
 class Metadata(object):
-    Root = None
 
     def __init__(self, folder, filename='gathr.yaml',
                  dynamic_package='gathr.dynamic'):
@@ -19,8 +15,9 @@ class Metadata(object):
         self.resource_types = {}
         self.dynamic_package = dynamic_package
         self.yaml_data = yaml.load(open(os.path.join(folder, filename)))
-        self.load_resource_type('Root', {'children': self.yaml_data})
-        sys.meta_path.append(self)
+        self.Root = self.load_resource_type(
+            'Root', {'children': self.yaml_data})
+        self.hook_import()
 
     def load_resource_type(self, name, node):
         addable_types = []
@@ -35,10 +32,8 @@ class Metadata(object):
         return resource_type
 
     def find_module(self, fullname, path=None):
-        registry = get_current_registry()
-        if registry and getattr(registry, 'metadata', None) is self:
-            if fullname == self.dynamic_package:
-                return self
+        if fullname == self.dynamic_package:
+            return self
 
     def load_module(self, fullname):
         if fullname in sys.modules:
@@ -49,3 +44,11 @@ class Metadata(object):
         module.__dict__.update(self.resource_types)
         sys.modules[fullname] = module
         return module
+
+    def hook_import(self):
+        sys.meta_path.append(self)
+
+    def unhook_import(self):
+        if self.dynamic_package in sys.modules:
+            del sys.modules[self.dynamic_package]
+        sys.meta_path.remove(self)
