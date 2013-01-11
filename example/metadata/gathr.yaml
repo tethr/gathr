@@ -1,0 +1,5 @@
+Clinic:
+  children:
+    Patient:
+      children:
+        Visit: {}

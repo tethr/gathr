@@ -9,6 +9,7 @@ requires = [
     'churro',
     'pyramid',
     'pyramid_tm',
+    'PyYAML',
 ]
 tests_require = requires + []
 
@@ -55,4 +56,11 @@ setup(name='gathr',
           'testing': testing_extras,
           'docs': doc_extras,
       },
-      test_suite="gathr.tests")
+      test_suite="gathr.tests",
+      entry_points="""\
+      [paste.app_factory]
+      main = gathr.application:main
+
+      [console_scripts]
+      gathr = gathr.scripts.main:main
+      """)
