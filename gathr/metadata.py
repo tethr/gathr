@@ -14,12 +14,12 @@ class Metadata(object):
         self.folder = folder
         self.resource_types = {}
         self.dynamic_package = dynamic_package
-        self.yaml_data = yaml.load(open(os.path.join(folder, filename)))
-        self.Root = ResourceType.load(
-            self.resource_types, dynamic_package, 'Root', {
-            'children': self.yaml_data,
+        yaml_data = yaml.load(open(os.path.join(folder, filename)))
+        yaml_data.update({
             'id': 'root',
             'one_only': True})
+        self.Root = ResourceType.load(
+            self.resource_types, dynamic_package, 'Root', yaml_data)
         self.hook_import()
 
     def find_module(self, fullname, path=None):
@@ -58,7 +58,8 @@ class ResourceType(PersistentType):
         members = {
             'addable_types': addable_types,
             'one_only': node.pop('one_only', False),
-            'next_id': node.pop('id', 'name')
+            'next_id': node.pop('id', 'name'),
+            'title': node.pop('title', None)
         }
 
         assert not node, "Unknown resource attributes: %s" % node

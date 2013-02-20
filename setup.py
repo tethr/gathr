@@ -8,6 +8,7 @@ VERSION = '0.1dev'
 requires = [
     'churro',
     'pyramid',
+    'pyramid_layout',
     'pyramid_tm',
     'PyYAML',
 ]

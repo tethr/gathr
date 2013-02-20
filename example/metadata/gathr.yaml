@@ -1,8 +1,10 @@
-Clinic:
-  children:
-    Patient:
+title: Gathr Example
+children:
+    Clinic:
       children:
-        InitialVisit:
-          one_only: true
-        FollowUpVisit:
-          id: serial
+        Patient:
+          children:
+            InitialVisit:
+              one_only: true
+            FollowUpVisit:
+              id: serial
