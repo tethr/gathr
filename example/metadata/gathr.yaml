@@ -2,4 +2,7 @@ Clinic:
   children:
     Patient:
       children:
-        Visit: {}
+        InitialVisit:
+          one_only: true
+        FollowUpVisit:
+          id: serial

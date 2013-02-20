@@ -15,21 +15,12 @@ class Metadata(object):
         self.resource_types = {}
         self.dynamic_package = dynamic_package
         self.yaml_data = yaml.load(open(os.path.join(folder, filename)))
-        self.Root = self.load_resource_type(
-            'Root', {'children': self.yaml_data})
+        self.Root = ResourceType.load(
+            self.resource_types, dynamic_package, 'Root', {
+            'children': self.yaml_data,
+            'id': 'root',
+            'one_only': True})
         self.hook_import()
-
-    def load_resource_type(self, name, node):
-        addable_types = []
-        children = node.get('children')
-        if children:
-            for childname, child in children.items():
-                addable_types.append(
-                    self.load_resource_type(childname, child))
-        self.resource_types[name] = resource_type = PersistentType(
-            name, (PersistentFolder,), {'addable_types': addable_types})
-        resource_type.__module__ = self.dynamic_package
-        return resource_type
 
     def find_module(self, fullname, path=None):
         if fullname == self.dynamic_package:
@@ -52,3 +43,32 @@ class Metadata(object):
         if self.dynamic_package in sys.modules:
             del sys.modules[self.dynamic_package]
         sys.meta_path.remove(self)
+
+
+class ResourceType(PersistentType):
+
+    @classmethod
+    def load(cls, types, package, name, node):
+        addable_types = []
+        children = node.pop('children', None)
+        if children:
+            for childname, child in children.items():
+                addable_types.append(cls.load(types, package, childname, child))
+
+        members = {
+            'addable_types': addable_types,
+            'one_only': node.pop('one_only', False),
+            'next_id': node.pop('id', 'name')
+        }
+
+        assert not node, "Unknown resource attributes: %s" % node
+
+        resource_type = ResourceType(name, (Resource,), members)
+        resource_type.__module__ = package
+        types[name] = resource_type
+        return resource_type
+
+
+class Resource(PersistentFolder):
+    pass
+
