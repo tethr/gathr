@@ -4,7 +4,7 @@ children:
       children:
         Patient:
           children:
-            InitialVisit:
+            Initial Visit:
               one_only: true
-            FollowUpVisit:
+            Follow Up Visit:
               id: serial

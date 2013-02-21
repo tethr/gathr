@@ -3,8 +3,11 @@ import os
 import sys
 import yaml
 
-from churro import PersistentType
 from churro import PersistentFolder
+from churro import PersistentProperty
+from churro import PersistentType
+
+from .utils import make_name
 
 
 class Metadata(object):
@@ -58,9 +61,16 @@ class ResourceType(PersistentType):
         members = {
             'addable_types': addable_types,
             'one_only': node.pop('one_only', False),
-            'next_id': node.pop('id', 'name'),
-            'title': node.pop('title', None)
+            'next_id': node.pop('id', 'user'),
+            'type_title': node.pop('title', None)
         }
+
+        if 'display' in node:
+            members['display'] = node.pop('display')
+        else:
+            members['display'] = name
+        members['plural'] = node.pop('plural', members['display'] + 's')
+        name = make_name(types, name.title().replace(' ', ''))
 
         assert not node, "Unknown resource attributes: %s" % node
 
@@ -71,5 +81,17 @@ class ResourceType(PersistentType):
 
 
 class Resource(PersistentFolder):
-    pass
+    title = PersistentProperty()
+
+    def __init__(self):
+        for t in self.addable_types:
+            self[t.__name__] = ResourceContainer(t)
+        self.title = self.type_title
+
+
+class ResourceContainer(PersistentFolder):
+    title = PersistentProperty()
+
+    def __init__(self, resource_type):
+        self.title = resource_type.plural
 

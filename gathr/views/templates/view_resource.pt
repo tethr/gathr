@@ -4,6 +4,69 @@
         <!-- Body -->
         <div class="container-fluid">
             <h1>${title}</h1>
+            <tal:block repeat="t types">
+                <h2>
+                    ${t.plural}
+                    <a href="${t.add_url}" class="btn" role="button"
+                       tal:condition="t.next_id != 'user'">Add ${t.singular}</a>
+                    <a href="#add-${t.name}-modal" class="btn" role="button"
+                       data-toggle="modal"
+                       tal:condition="t.next_id == 'user'">Add ${t.singular}</a>
+                </h2> 
+                <ul tal:condition="t.children">
+                    <li tal:repeat="child t.children">
+                        <a href="${child.url}">${child.title}</a>
+                    </li>
+                </ul>
+            </tal:block>
         </div>
-   </metal:block>
+
+        <!-- Add named resource popover -->
+        <tal:x repeat="t types"><div class="modal hide fade" 
+            id="add-${t.name}-modal" tal:condition="t.next_id == 'user'">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" 
+                        aria-hidden="true">&times;</button>
+                <h3>Add ${t.singular}</h3>
+            </div>
+            <form action="${t.add_url}" method="POST">
+                <div class="modal-body">
+                    <fieldset>
+                        <input type="text" placeholder="${t.singular} ID"
+                               name="title"/>
+                    </fieldset>
+                </div>
+                <div class="modal-footer">
+                    <a href="#" class="btn" data-dismiss="modal" 
+                       aria-hidden="true">Close</a>
+                    <button type="submit" 
+                        class="btn btn-primary">Create ${t.singular}</button>
+                </div>
+            </form>
+        </div></tal:x>
+    </metal:block>
+
+    <metal:block fill-slot="tail-scripts">
+        <script tal:repeat="t types">
+            $(document).ready(function() {
+                // Focus input when form shown
+                $("#add-${t.name}-modal").on("shown", function() {
+                    $("input[name='title']").focus();                    
+                });
+
+                // Submit form via AJAX
+                $("#add-${t.name}-modal form").on("submit", function() {
+                    var title = $("input[name='title']").val();
+                    if (!title) return false;
+                    $.post("${t.add_url}", {title: title}).done(
+                        function(data) {
+                            $('body').fadeOut('fast', function() {
+                                window.location = data['resource_url'];
+                            });
+                        });
+                    return false;
+                });
+            });
+        </script>
+    </metal:block>
 </html>

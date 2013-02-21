@@ -19,6 +19,13 @@
             </div>
         </div>
 
+        <ul class="breadcrumb">
+            <li tal:repeat="crumb layout.breadcrumbs">
+                <a href="${crumb.url}">${crumb.title}</a>
+                <span class="divider">/</span>
+            </li>
+        </ul>
+
         <metal:block define-slot="page-content"></metal:block>
 
         <!-- Scripts -->
