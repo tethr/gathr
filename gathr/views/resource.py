@@ -1,3 +1,4 @@
+from pyramid.httpexceptions import HTTPConflict
 from pyramid.view import view_config
 
 from ..metadata import Resource
@@ -33,7 +34,12 @@ def add_resource(context, request):
     metadata = request.registry.metadata
     resource_type = metadata.resource_types[type_name]
     folder = context[type_name]
-    name = make_name(context, title)
+    try:
+        name = make_name(folder, title)
+    except ValueError, e:
+        response = HTTPConflict()
+        response.body = str(e)
+        return response
     resource = resource_type()
     resource.title = title
     folder[name] = resource

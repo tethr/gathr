@@ -31,10 +31,13 @@
             </div>
             <form action="${t.add_url}" method="POST">
                 <div class="modal-body">
-                    <fieldset>
-                        <input type="text" placeholder="${t.singular} ID"
-                               name="title"/>
-                    </fieldset>
+                    <div class="control-group">
+                        <fieldset>
+                            <input type="text" placeholder="${t.singular} ID"
+                                   name="title"/>
+                            <span class="help-inline"></span>
+                        </fieldset>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <a href="#" class="btn" data-dismiss="modal" 
@@ -55,17 +58,27 @@
                 });
 
                 // Submit form via AJAX
+                function clearError() {
+                    $("#add-${t.name}-modal .control-group").removeClass("error");
+                    $("#add-${t.name}-modal .help-inline").text("");
+                }
                 $("#add-${t.name}-modal form").on("submit", function() {
-                    var title = $("input[name='title']").val();
+                    var title = $("#add-${t.name}-modal input[name='title']").val();
                     if (!title) return false;
                     $.post("${t.add_url}", {title: title}).done(
                         function(data) {
                             $('body').fadeOut('fast', function() {
                                 window.location = data['resource_url'];
                             });
+                    }).error(
+                        function(event) {
+                            $("#add-${t.name}-modal .control-group").addClass("error");
+                            $("#add-${t.name}-modal .help-inline").text(event.responseText);
                         });
                     return false;
                 });
+                $("#add-${t.name}-modal").on("hidden", clearError);
+                $("#add-${t.name}-modal input[name='title']").on("keydown", clearError);
             });
         </script>
     </metal:block>
