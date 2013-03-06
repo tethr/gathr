@@ -62,7 +62,6 @@ class ResourceType(PersistentType):
             'addable_types': addable_types,
             'one_only': node.pop('one_only', False),
             'next_id': node.pop('id', 'user'),
-            'type_title': node.pop('title', None)
         }
 
         if 'display' in node:
@@ -71,6 +70,16 @@ class ResourceType(PersistentType):
             members['display'] = name
         members['plural'] = node.pop('plural', members['display'] + 's')
         name = make_name(types, name.title().replace(' ', ''))
+
+        if members['next_id'] == 'serial':
+            def title(self):
+                # Will need to use or return TranslationString for i18n
+                return '%s %s' % (self.display, self.__name__)
+            members['title'] = property(title)
+        elif members['next_id'] == 'user':
+            members['title'] = PersistentProperty()
+        elif members['next_id'] == 'root':
+            members['title'] = node.pop('title')
 
         assert not node, "Unknown resource attributes: %s" % node
 
@@ -81,12 +90,10 @@ class ResourceType(PersistentType):
 
 
 class Resource(PersistentFolder):
-    title = PersistentProperty()
 
     def __init__(self):
         for t in self.addable_types:
             self[t.__name__] = ResourceContainer(t)
-        self.title = self.type_title
 
 
 class ResourceContainer(PersistentFolder):

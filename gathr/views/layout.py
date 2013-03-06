@@ -27,7 +27,7 @@ class Layout(object):
         breadcrumbs = deque()
         node = self.context
         url = self.request.resource_url
-        while node:
+        while node is not None:
             if not isinstance(node, ResourceContainer):
                 breadcrumbs.appendleft({
                     'title': node.title,
