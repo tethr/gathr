@@ -18,11 +18,12 @@ class Metadata(object):
         self.resource_types = {}
         self.dynamic_package = dynamic_package
         yaml_data = yaml.load(open(os.path.join(folder, filename)))
-        yaml_data.update({
-            'id': 'root',
-            'one_only': True})
+        tree = yaml_data['tree']
+        assert len(tree) == 1, "One and only one root resource allowed."
+        name, node = tree.items()[0]
+        node['one_only'] = True
         self.Root = ResourceType.load(
-            self.resource_types, dynamic_package, 'Root', yaml_data)
+            self.resource_types, dynamic_package, name, node)
         self.hook_import()
 
     def find_module(self, fullname, path=None):
@@ -53,15 +54,26 @@ class ResourceType(PersistentType):
     @classmethod
     def load(cls, types, package, name, node):
         addable_types = []
+        singleton_types = []
         children = node.pop('children', None)
         if children:
             for childname, child in children.items():
-                addable_types.append(cls.load(types, package, childname, child))
+                t = cls.load(types, package, childname, child)
+                if t.one_only:
+                    singleton_types.append(t)
+                else:
+                    addable_types.append(t)
 
+        one_only = node.pop('one_only', False)
+        if one_only:
+            next_id = 'singleton'
+        else:
+            next_id = node.pop('id', 'user')
         members = {
             'addable_types': addable_types,
-            'one_only': node.pop('one_only', False),
-            'next_id': node.pop('id', 'user'),
+            'singleton_types': singleton_types,
+            'one_only': one_only,
+            'next_id': next_id,
         }
 
         if 'display' in node:
@@ -78,8 +90,8 @@ class ResourceType(PersistentType):
             members['title'] = property(title)
         elif members['next_id'] == 'user':
             members['title'] = PersistentProperty()
-        elif members['next_id'] == 'root':
-            members['title'] = node.pop('title')
+        elif members['next_id'] == 'singleton':
+            members['title'] = members['display']
 
         assert not node, "Unknown resource attributes: %s" % node
 
@@ -92,6 +104,8 @@ class ResourceType(PersistentType):
 class Resource(PersistentFolder):
 
     def __init__(self):
+        for t in self.singleton_types:
+            self[t.__name__] = t()
         for t in self.addable_types:
             self[t.__name__] = ResourceContainer(t)
 

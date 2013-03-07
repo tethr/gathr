@@ -4,6 +4,11 @@
         <!-- Body -->
         <div class="container-fluid">
             <h1>${title}</h1>
+            <tal:block repeat="child children">
+                <h2>
+                    <a href="${child.url}">${child.title}</a>
+                </h2>
+            </tal:block>
             <tal:block repeat="t types">
                 <h2>
                     ${t.plural}
