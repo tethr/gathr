@@ -7,6 +7,8 @@ from churro import PersistentFolder
 from churro import PersistentProperty
 from churro import PersistentType
 
+from pyramid.httpexceptions import HTTPConflict
+
 from .utils import make_name
 
 
@@ -17,8 +19,7 @@ class Metadata(object):
         self.folder = folder
         self.resource_types = {}
         self.dynamic_package = dynamic_package
-        yaml_data = yaml.load(open(os.path.join(folder, filename)))
-        tree = yaml_data['tree']
+        tree = yaml.load(open(os.path.join(folder, filename)))
         assert len(tree) == 1, "One and only one root resource allowed."
         name, node = tree.items()[0]
         node['one_only'] = True
@@ -88,8 +89,27 @@ class ResourceType(PersistentType):
                 # Will need to use or return TranslationString for i18n
                 return '%s %s' % (self.display, self.__name__)
             members['title'] = property(title)
+            def create_serial(cls, folder, request):
+                name = str(len(folder) + 1)
+                folder[name] = resource = cls()
+                return resource
+            members['create'] = classmethod(create_serial)
+
         elif members['next_id'] == 'user':
             members['title'] = PersistentProperty()
+            def create_user(cls, folder, request):
+                title = request.params['title']
+                try:
+                    name = make_name(folder, title)
+                    folder[name] = resource = cls()
+                    resource.title = title
+                    return resource
+                except ValueError, e:
+                    error = HTTPConflict()
+                    error.body = str(e)
+                    raise error
+            members['create'] = classmethod(create_user)
+
         elif members['next_id'] == 'singleton':
             members['title'] = members['display']
 

@@ -1,10 +1,8 @@
-from pyramid.httpexceptions import HTTPConflict
 from pyramid.httpexceptions import HTTPFound
 from pyramid.view import view_config
 
 from ..metadata import Resource
 from ..metadata import ResourceContainer
-from ..utils import make_name
 
 
 @view_config(context=Resource, renderer="templates/view_resource.pt")
@@ -40,22 +38,8 @@ def add_resource(context, request):
     metadata = request.registry.metadata
     resource_type = metadata.resource_types[type_name]
     folder = context[type_name]
-    resource = resource_type()
-    if resource_type.next_id == 'user':
-        resource.title = title = request.params['title']
-        try:
-            name = make_name(folder, title)
-        except ValueError, e:
-            response = HTTPConflict()
-            response.body = str(e)
-            return response
-    elif resource_type.next_id == 'serial':
-        id = len(folder) + 1
-        name = str(id)
-
-    folder[name] = resource
+    resource = resource_type.create(folder, request)
     resource_url = request.resource_url(resource)
     if request.is_xhr:
         return {'resource_url': resource_url}
     return HTTPFound(resource_url)
-

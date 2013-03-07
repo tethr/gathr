@@ -1,11 +1,10 @@
-tree:
-  Gathr Example:
-    children:
-      Clinic:
-        children:
-          Patient:
-            children:
-              Initial Visit:
-                one_only: true
-              Follow Up Visit:
-                id: serial
+Gathr Example:
+  children:
+    Clinic:
+      children:
+        Patient:
+          children:
+            Initial Visit:
+              one_only: true
+            Follow Up Visit:
+              id: serial
