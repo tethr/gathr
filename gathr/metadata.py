@@ -17,15 +17,29 @@ class Metadata(object):
     def __init__(self, folder, filename='gathr.yaml',
                  dynamic_package='gathr.dynamic'):
         self.folder = folder
+        self.datastreams = {}
         self.resource_types = {}
         self.dynamic_package = dynamic_package
-        tree = yaml.load(open(os.path.join(folder, filename)))
-        assert len(tree) == 1, "One and only one root resource allowed."
-        name, node = tree.items()[0]
+        yaml_data = yaml.load(open(os.path.join(folder, filename)))
+        self.load_resources(yaml_data)
+        self.load_datastreams(yaml_data)
+
+    def load_resources(self, yaml_data):
+        resources = yaml_data['resources']
+        assert len(resources) == 1, "One and only one root resource allowed."
+        name, node = resources.items()[0]
         node['one_only'] = True
         self.Root = ResourceType.load(
-            self.resource_types, dynamic_package, name, node)
+            self.resource_types, self.dynamic_package, name, node)
         self.hook_import()
+
+    def load_datastreams(self, yaml_data):
+        datastreams = yaml_data.get('datastreams')
+        if not datastreams:
+            return
+
+        for name, fields in datastreams.items():
+            self.datastreams[name] = Datastream(name, fields)
 
     def find_module(self, fullname, path=None):
         if fullname == self.dynamic_package:
@@ -135,4 +149,42 @@ class ResourceContainer(PersistentFolder):
 
     def __init__(self, resource_type):
         self.title = resource_type.plural
+
+
+class Datastream(object):
+
+    def __init__(self, name, fields):
+        self.name = name
+        self.fields = [Field.load(node) for node in fields]
+
+
+class Field(object):
+    types = {}
+
+    @classmethod
+    def load(cls, node):
+        type = node.pop('type')
+        return cls.types[type](node)
+
+    def __init__(self, node):
+        self.name = node.pop('name')
+
+        assert not node, "Unknown field attributes: %s" % node
+
+
+def fieldtype(name):
+    def decorator(cls):
+        Field.types[name] = cls
+        return cls
+    return decorator
+
+
+@fieldtype('string')
+class StringField(Field):
+    pass
+
+
+@fieldtype('integer')
+class IntegerField(Field):
+    pass
 

@@ -25,12 +25,13 @@ class MetadataTests(unittest.TestCase):
         return self.metadata
 
     def test_create_resource_types(self):
-        yaml = ("Study:\n"
-                "  children:\n"
-                "    Clinic:\n"
-                "      children:\n"
-                "        Patient: {}\n"
-                "        Nurse: {}\n")
+        yaml = ("resources:\n"
+                "  Study:\n"
+                "    children:\n"
+                "      Clinic:\n"
+                "        children:\n"
+                "          Patient: {}\n"
+                "          Nurse: {}\n")
         md = self.make_one(yaml)
         rt = md.resource_types
         self.assertEqual(len(rt), 4, rt)
@@ -40,12 +41,13 @@ class MetadataTests(unittest.TestCase):
         self.assertIn(rt['Nurse'], rt['Clinic'].addable_types)
 
     def test_hook_import(self):
-        yaml = ("Study:\n"
-                "  children:\n"
-                "    Clinic:\n"
-                "      children:\n"
-                "        Patient: {}\n"
-                "        Nurse: {}\n")
+        yaml = ("resources:\n"
+                "  Study:\n"
+                "    children:\n"
+                "      Clinic:\n"
+                "        children:\n"
+                "          Patient: {}\n"
+                "          Nurse: {}\n")
         md = self.make_one(yaml)
         rt = md.resource_types
         from gathr.dynamic import Study
@@ -59,30 +61,33 @@ class MetadataTests(unittest.TestCase):
         self.assertIs(Nurse, md.load_module('gathr.dynamic').Nurse)
 
     def test_singleton(self):
-        yaml = ("Study:\n"
-                "  children:\n"
-                "    Singleton:\n"
-                "      one_only: True")
+        yaml = ("resources:\n"
+                "  Study:\n"
+                "    children:\n"
+                "      Singleton:\n"
+                "        one_only: True")
         md = self.make_one(yaml)
         rt = md.resource_types
         root = md.Root()
         self.assertIsInstance(root['Singleton'], rt['Singleton'])
 
     def test_display_name(self):
-        yaml = ("Study:\n"
-                "  children:\n"
-                "    Dude:\n"
-                "      display: Man\n")
+        yaml = ("resources:\n"
+                "  Study:\n"
+                "    children:\n"
+                "      Dude:\n"
+                "        display: Man\n")
         md = self.make_one(yaml)
         rt = md.resource_types
         self.assertEqual(rt['Study'].display, 'Study')
         self.assertEqual(rt['Dude'].display, 'Man')
 
     def test_serial(self):
-        yaml = ("Study:\n"
-                "  children:\n"
-                "    LolCat:\n"
-                "      id: serial\n")
+        yaml = ("resources:\n"
+                "  Study:\n"
+                "    children:\n"
+                "      LolCat:\n"
+                "        id: serial\n")
         md = self.make_one(yaml)
         root = md.Root()
         LolCat = root.addable_types[0]
@@ -96,9 +101,10 @@ class MetadataTests(unittest.TestCase):
     def test_user(self):
         from pyramid.httpexceptions import HTTPConflict
         from pyramid.testing import DummyRequest
-        yaml = ("Study:\n"
-                "  children:\n"
-                "    Clinic: {}\n")
+        yaml = ("resources:\n"
+                "  Study:\n"
+                "    children:\n"
+                "      Clinic: {}\n")
         md = self.make_one(yaml)
         root = md.Root()
         request = DummyRequest(params={'title': 'Foo Bar'})
@@ -110,3 +116,38 @@ class MetadataTests(unittest.TestCase):
         self.assertIn('Foo-Bar', folder)
         with self.assertRaises(HTTPConflict):
             Clinic.create(folder, request)
+
+    def test_datastreams(self):
+        from ..metadata import StringField
+        from ..metadata import IntegerField
+        yaml = ("resources:\n"
+                "  Study: {}\n"
+                "datastreams:\n"
+                "  one:\n"
+                "    -\n"
+                "      name: A\n"
+                "      type: string\n"
+                "    -\n"
+                "      name: B\n"
+                "      type: integer\n"
+                "  two:\n"
+                "    -\n"
+                "      name: A\n"
+                "      type: string\n"
+                "    -\n"
+                "      name: B\n"
+                "      type: integer\n")
+        md = self.make_one(yaml)
+        one = md.datastreams['one']
+        self.assertEqual(one.name, 'one')
+        self.assertEqual(one.fields[0].name, 'A')
+        self.assertIsInstance(one.fields[0], StringField)
+        self.assertEqual(one.fields[1].name, 'B')
+        self.assertIsInstance(one.fields[1], IntegerField)
+
+        two = md.datastreams['two']
+        self.assertEqual(two.name, 'two')
+        self.assertEqual(two.fields[0].name, 'A')
+        self.assertIsInstance(two.fields[0], StringField)
+        self.assertEqual(two.fields[1].name, 'B')
+        self.assertIsInstance(two.fields[1], IntegerField)
