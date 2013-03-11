@@ -36,7 +36,7 @@ def view_resource(context, request):
 def add_resource(context, request):
     type_name = request.params['type']
     metadata = request.registry.metadata
-    resource_type = metadata.resource_types[type_name]
+    resource_type = metadata.classes[type_name]
     folder = context[type_name]
     resource = resource_type.create(folder, request)
     resource_url = request.resource_url(resource)

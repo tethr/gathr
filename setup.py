@@ -7,6 +7,7 @@ VERSION = '0.1dev'
 
 requires = [
     'churro',
+    'deform_bootstrap',
     'pyramid',
     'pyramid_layout',
     'pyramid_tm',

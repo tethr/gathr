@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html metal:use-macro="main_template">
+    <metal:block fill-slot="page-content">
+        <!-- Body -->
+        <div class="container-fluid">
+            <h1>${title}</h1>
+            ${form}
+       </div>
+    </metal:block>
+</html>

@@ -5,14 +5,12 @@ resources:
       Clinic:
         children:
           Patient:
-            forms:
-              Patient Intake:
-                datastream: demographics
-                one_only: true
- 
             children:
               Initial Visit:
                 one_only: true
+                forms:
+                  Patient Intake:
+                    datastream: demographics
               Follow Up Visit:
                 id: serial
 

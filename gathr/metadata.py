@@ -1,8 +1,11 @@
+import colander
 import imp
 import os
 import sys
 import yaml
 
+from churro import Persistent
+from churro import PersistentDict
 from churro import PersistentFolder
 from churro import PersistentProperty
 from churro import PersistentType
@@ -18,7 +21,7 @@ class Metadata(object):
                  dynamic_package='gathr.dynamic'):
         self.folder = folder
         self.datastreams = {}
-        self.resource_types = {}
+        self.classes = {}
         self.dynamic_package = dynamic_package
         yaml_data = yaml.load(open(os.path.join(folder, filename)))
         self.load_resources(yaml_data)
@@ -30,7 +33,7 @@ class Metadata(object):
         name, node = resources.items()[0]
         node['one_only'] = True
         self.Root = ResourceType.load(
-            self.resource_types, self.dynamic_package, name, node)
+            self, self.classes, self.dynamic_package, name, node)
         self.hook_import()
 
     def load_datastreams(self, yaml_data):
@@ -39,7 +42,7 @@ class Metadata(object):
             return
 
         for name, fields in datastreams.items():
-            self.datastreams[name] = Datastream(name, fields)
+            self.datastreams[name] = Datastream(self, name, fields)
 
     def find_module(self, fullname, path=None):
         if fullname == self.dynamic_package:
@@ -51,7 +54,7 @@ class Metadata(object):
         module = imp.new_module(fullname)
         module.__loader__ = self
         module.__file__ = '<dynamic>'
-        module.__dict__.update(self.resource_types)
+        module.__dict__.update(self.classes)
         sys.modules[fullname] = module
         return module
 
@@ -67,17 +70,24 @@ class Metadata(object):
 class ResourceType(PersistentType):
 
     @classmethod
-    def load(cls, types, package, name, node):
+    def load(cls, metadata, types, package, name, node):
         addable_types = []
         singleton_types = []
         children = node.pop('children', None)
         if children:
             for childname, child in children.items():
-                t = cls.load(types, package, childname, child)
+                t = cls.load(metadata, types, package, childname, child)
                 if t.one_only:
                     singleton_types.append(t)
                 else:
                     addable_types.append(t)
+
+        addable_forms = []
+        forms = node.pop('forms', None)
+        if forms:
+            for formname, form in forms.items():
+                addable_forms.append(FormType.load(
+                    metadata, types, package, formname, form))
 
         one_only = node.pop('one_only', False)
         if one_only:
@@ -87,8 +97,10 @@ class ResourceType(PersistentType):
         members = {
             'addable_types': addable_types,
             'singleton_types': singleton_types,
+            'addable_forms': addable_forms,
             'one_only': one_only,
             'next_id': next_id,
+            '__metadata__': metadata,
         }
 
         if 'display' in node:
@@ -138,10 +150,12 @@ class ResourceType(PersistentType):
 class Resource(PersistentFolder):
 
     def __init__(self):
-        for t in self.singleton_types:
-            self[t.__name__] = t()
-        for t in self.addable_types:
-            self[t.__name__] = ResourceContainer(t)
+        for T in self.singleton_types:
+            self[T.__name__] = T()
+        for T in self.addable_types:
+            self[T.__name__] = ResourceContainer(T)
+        for F in self.addable_forms:
+            self[F.__name__] = F()
 
 
 class ResourceContainer(PersistentFolder):
@@ -151,9 +165,46 @@ class ResourceContainer(PersistentFolder):
         self.title = resource_type.plural
 
 
+class FormType(PersistentType):
+
+    @classmethod
+    def load(cls, metadata, types, package, name, node):
+        members = {
+            'datastream': node.pop('datastream'),
+            '__metadata__': metadata,
+        }
+        if 'display' in node:
+            members['title'] = node.pop('display')
+        else:
+            members['title'] = name
+        name = make_name(types, name.title().replace(' ', ''))
+
+        assert not node, "Unknown resource attributes: %s" % node
+
+        form = FormType(name, (Form,), members)
+        form.__module__ = package
+        types[name] = form
+        return form
+
+
+class Form(Persistent):
+    data = PersistentProperty()
+
+    def __init__(self):
+        self.data = PersistentDict()
+
+    def schema(self):
+        datastream = self.__metadata__.datastreams[self.datastream]
+        schema = colander.SchemaNode(colander.Mapping())
+        for field in datastream.fields:
+            schema.add(field.field())
+        return schema
+
+
 class Datastream(object):
 
-    def __init__(self, name, fields):
+    def __init__(self, metadata, name, fields):
+        self.__metadata__ = metadata
         self.name = name
         self.fields = [Field.load(node) for node in fields]
 
@@ -171,6 +222,9 @@ class Field(object):
 
         assert not node, "Unknown field attributes: %s" % node
 
+    def field(self):
+        return colander.SchemaNode(self.schema_type(), name=self.name)
+
 
 def fieldtype(name):
     def decorator(cls):
@@ -181,10 +235,10 @@ def fieldtype(name):
 
 @fieldtype('string')
 class StringField(Field):
-    pass
+    schema_type = colander.String
 
 
 @fieldtype('integer')
 class IntegerField(Field):
-    pass
+    schema_type = colander.Int
 

@@ -92,7 +92,7 @@ def make_name(context, title, raise_error=True):
         raise ValueError('The name must not be empty')
 
     # Make sure the name is unique in the context
-    if name in context and raise_error:
+    if raise_error and context and name in context:
         fmt = "The name '%s' already exists in folder '%s'"
         msg = fmt % (name, context.__name__)
         raise ValueError(msg)
@@ -137,3 +137,8 @@ def make_unique_name_and_postfix(context, title):
             # processes hang forever :)
 
     return unique_name, postfix
+
+
+class HTML(unicode):
+    def __html__(self):
+        return self
