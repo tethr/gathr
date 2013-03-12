@@ -151,3 +151,63 @@ class MetadataTests(unittest.TestCase):
         self.assertIsInstance(two.fields[0], StringField)
         self.assertEqual(two.fields[1].name, 'B')
         self.assertIsInstance(two.fields[1], IntegerField)
+
+    def test_form(self):
+        yaml = ("resources:\n"
+                "  Study:\n"
+                "    forms:\n"
+                "      Manifesto:\n"
+                "        datastream: manifesto\n")
+        md = self.make_one(yaml)
+        form = md.classes['Manifesto']
+        self.assertEqual(form.datastream, 'manifesto')
+        Study = md.classes['Study']
+        study = Study()
+        self.assertIn('Manifesto', study)
+
+    def test_form_title(self):
+        yaml = ("resources:\n"
+                "  Study:\n"
+                "    forms:\n"
+                "      Manifesto:\n"
+                "        display: Hoo Ha!\n"
+                "        datastream: manifesto\n")
+        md = self.make_one(yaml)
+        form = md.classes['Manifesto']
+        self.assertEqual(form.datastream, 'manifesto')
+        Study = md.classes['Study']
+        study = Study()
+        self.assertIn('Manifesto', study)
+        self.assertEqual(study['Manifesto'].title, 'Hoo Ha!')
+
+    def test_form_w_string_field(self):
+        import colander
+        yaml = ("resources:\n"
+                "  Study:\n"
+                "    forms:\n"
+                "      Manifesto:\n"
+                "        datastream: manifesto\n"
+                "datastreams:\n"
+                "  manifesto:\n"
+                "    -\n"
+                "      name: foo\n"
+                "      type: string\n")
+        md = self.make_one(yaml)
+        schema = md.Root()['Manifesto'].schema()
+        self.assertIsInstance(schema.get('foo').typ, colander.String)
+
+    def test_form_w_int_field(self):
+        import colander
+        yaml = ("resources:\n"
+                "  Study:\n"
+                "    forms:\n"
+                "      Manifesto:\n"
+                "        datastream: manifesto\n"
+                "datastreams:\n"
+                "  manifesto:\n"
+                "    -\n"
+                "      name: foo\n"
+                "      type: integer\n")
+        md = self.make_one(yaml)
+        schema = md.Root()['Manifesto'].schema()
+        self.assertIsInstance(schema.get('foo').typ, colander.Int)

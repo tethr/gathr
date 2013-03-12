@@ -24,11 +24,11 @@ class Metadata(object):
         self.classes = {}
         self.dynamic_package = dynamic_package
         yaml_data = yaml.load(open(os.path.join(folder, filename)))
-        self.load_resources(yaml_data)
-        self.load_datastreams(yaml_data)
+        self.load_resources(yaml_data.pop('resources'))
+        self.load_datastreams(yaml_data.pop('datastreams', None))
+        assert not yaml_data, "Unknown nodes in metadata: %s" % yaml_data
 
-    def load_resources(self, yaml_data):
-        resources = yaml_data['resources']
+    def load_resources(self, resources):
         assert len(resources) == 1, "One and only one root resource allowed."
         name, node = resources.items()[0]
         node['one_only'] = True
@@ -36,11 +36,9 @@ class Metadata(object):
             self, self.classes, self.dynamic_package, name, node)
         self.hook_import()
 
-    def load_datastreams(self, yaml_data):
-        datastreams = yaml_data.get('datastreams')
+    def load_datastreams(self, datastreams):
         if not datastreams:
             return
-
         for name, fields in datastreams.items():
             self.datastreams[name] = Datastream(self, name, fields)
 
