@@ -16,7 +16,7 @@ def form(context, request):
     if 'submit' in request.params:
         try:
             data = form.validate(request.params.items())
-            context.data.update(data)
+            context.update(data)
             return HTTPFound(request.resource_url(context.__parent__))
         except deform.ValidationFailure, e:
             form = e.render()

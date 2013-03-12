@@ -1,4 +1,5 @@
 import colander
+import csv
 import imp
 import os
 import sys
@@ -11,6 +12,7 @@ from churro import PersistentProperty
 from churro import PersistentType
 
 from pyramid.httpexceptions import HTTPConflict
+from pyramid.traversal import resource_path
 
 from .utils import make_name
 
@@ -198,6 +200,11 @@ class Form(Persistent):
             schema.add(field.field())
         return schema
 
+    def update(self, data):
+        self.data.update(data)
+        datastream = self.__metadata__.datastreams[self.datastream]
+        datastream.record(self._fs, self)
+
 
 class Datastream(object):
 
@@ -205,6 +212,37 @@ class Datastream(object):
         self.__metadata__ = metadata
         self.name = name
         self.fields = [Field.load(node) for node in fields]
+
+    def record(self, fs, form):
+        if not fs.exists('/datastreams'):
+            fs.mkdir('/datastreams')
+        data = form.data.copy()
+        data['PATH'] = path = resource_path(form)
+        fpath = '/datastreams/%s.csv' % self.name
+        if fs.exists(fpath):
+            reader = csv.DictReader(fs.open(fpath, 'rb'))
+            with fs.open(fpath, 'wb') as out:
+                print >> out, ','.join(reader.fieldnames)
+                writer = csv.DictWriter(out, reader.fieldnames)
+                written = False
+                for row in reader:
+                    if path < row['PATH'] and not written:
+                        writer.writerow(data)
+                        writer.writerow(row)
+                        written = True
+                    elif path == row['PATH']:
+                        writer.writerow(data)
+                        written = True
+                    else:
+                        writer.writerow(row)
+                if path > row['PATH']:
+                    writer.writerow(data)
+        else:
+            fieldnames = ['PATH'] + form.data.keys()
+            with fs.open(fpath, 'wb') as out:
+                print >> out, ','.join(fieldnames)
+                writer = csv.DictWriter(out, fieldnames)
+                writer.writerow(data)
 
 
 class Field(object):
