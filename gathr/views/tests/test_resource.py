@@ -74,7 +74,7 @@ class AddResourceTests(unittest.TestCase):
 
         self.request = request = DummyRequest(params={'type': 'DummyType'})
         request.registry.metadata = md = mock.Mock()
-        md.resource_types = {'DummyType': DummyType}
+        md.classes = {'DummyType': DummyType}
 
     def call_fut(self):
         from ..resource import add_resource

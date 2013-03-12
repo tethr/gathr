@@ -33,7 +33,7 @@ class MetadataTests(unittest.TestCase):
                 "          Patient: {}\n"
                 "          Nurse: {}\n")
         md = self.make_one(yaml)
-        rt = md.resource_types
+        rt = md.classes
         self.assertEqual(len(rt), 4, rt)
         self.assertEqual(md.Root.__name__, 'Study')
         self.assertEqual(md.Root.addable_types[0].__name__, 'Clinic')
@@ -49,7 +49,7 @@ class MetadataTests(unittest.TestCase):
                 "          Patient: {}\n"
                 "          Nurse: {}\n")
         md = self.make_one(yaml)
-        rt = md.resource_types
+        rt = md.classes
         from gathr.dynamic import Study
         from gathr.dynamic import Clinic
         from gathr.dynamic import Patient
@@ -67,7 +67,7 @@ class MetadataTests(unittest.TestCase):
                 "      Singleton:\n"
                 "        one_only: True")
         md = self.make_one(yaml)
-        rt = md.resource_types
+        rt = md.classes
         root = md.Root()
         self.assertIsInstance(root['Singleton'], rt['Singleton'])
 
@@ -78,7 +78,7 @@ class MetadataTests(unittest.TestCase):
                 "      Dude:\n"
                 "        display: Man\n")
         md = self.make_one(yaml)
-        rt = md.resource_types
+        rt = md.classes
         self.assertEqual(rt['Study'].display, 'Study')
         self.assertEqual(rt['Dude'].display, 'Man')
 
