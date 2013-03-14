@@ -10,6 +10,7 @@ class MetadataTests(unittest.TestCase):
     def setUp(self):
         import tempfile
         self.tmp = tempfile.mkdtemp('.gathr-tests')
+        self._root = None
 
     def tearDown(self):
         import shutil
@@ -23,6 +24,22 @@ class MetadataTests(unittest.TestCase):
         open(os.path.join(self.tmp, 'gathr.yaml'), 'w').write(yaml)
         self.metadata = Metadata(self.tmp)
         return self.metadata
+
+    def assertStartsWith(self, s, sub):
+        self.assertTrue(s.startswith(sub),
+                        "%s does not start with %s" % (repr(s), repr(sub)))
+
+    def assertEndsWith(self, s, sub):
+        self.assertTrue(s.endswith(sub),
+                        "%s does not end with %s" % (repr(s), repr(sub)))
+
+    def root(self):
+        import churro
+        import os
+        datadir = os.path.join(self.tmp, 'data')
+        self.db = churro.Churro(datadir, factory=self.metadata.Root)
+        self._root = self.db.root()
+        return self._root
 
     def test_create_resource_types(self):
         yaml = ("resources:\n"
@@ -211,3 +228,79 @@ class MetadataTests(unittest.TestCase):
         md = self.make_one(yaml)
         schema = md.Root()['Manifesto'].schema()
         self.assertIsInstance(schema.get('foo').typ, colander.Int)
+
+    def test_form_update(self):
+        yaml = ("resources:\n"
+                "  Study:\n"
+                "    forms:\n"
+                "      Manifesto:\n"
+                "        datastream: manifesto\n"
+                "datastreams:\n"
+                "  manifesto:\n"
+                "    -\n"
+                "      name: foo\n"
+                "      type: string\n")
+        self.make_one(yaml)
+        root = self.root()
+        root['Manifesto'] = form = root.addable_forms[0]()
+        self.db.flush()
+        form.update({'foo': 'hubba'})
+        fs = self.db.fs
+        self.assertTrue(fs.exists('/datastreams/manifesto.csv'))
+        header, data = fs.open('/datastreams/manifesto.csv', 'r').readlines()
+        self.assertEqual(header, u'PATH,foo\n')
+        self.assertEqual(data, u'/Manifesto,hubba\n')
+
+    def test_form_insert_csv(self):
+        yaml = ("resources:\n"
+                "  Study:\n"
+                "    children:\n"
+                "      Child:\n"
+                "        forms:\n"
+                "          Favorites:\n"
+                "            datastream: favorites\n"
+                "datastreams:\n"
+                "  favorites:\n"
+                "    -\n"
+                "      name: color\n"
+                "      type: string\n")
+        self.make_one(yaml)
+        root = self.root()
+        Child = root.addable_types[0]
+        folder = root['Child']
+        folder['nick'] = nick = Child()
+        self.db.flush()
+        nick['Favorites'].update({'color': 'blue'})
+        folder['zeno'] = zeno = Child()
+        self.db.flush()
+        zeno['Favorites'].update({'color': 'black'})
+        folder['abby'] = abby = Child()
+        self.db.flush()
+        abby['Favorites'].update({'color': 'yellow'})
+        folder['jay'] = jay = Child()
+        self.db.flush()
+        jay['Favorites'].update({'color': 'red'})
+
+        lines = self.db.fs.open('/datastreams/favorites.csv')
+        lines.next() # throw away header
+        line = lines.next().strip()
+        self.assertStartsWith(line, '/Child/abby/Favorites')
+        self.assertEndsWith(line, 'yellow')
+        line = lines.next().strip()
+        self.assertStartsWith(line, '/Child/jay/Favorites')
+        self.assertEndsWith(line, 'red')
+        line = lines.next().strip()
+        self.assertStartsWith(line, '/Child/nick/Favorites')
+        self.assertEndsWith(line, 'blue')
+        line = lines.next().strip()
+        self.assertStartsWith(line, '/Child/zeno/Favorites')
+        self.assertEndsWith(line, 'black')
+        with self.assertRaises(StopIteration):
+            lines.next()
+
+        jay['Favorites'].update({'color': 'orange'})
+        lines = self.db.fs.open('/datastreams/favorites.csv').readlines()
+        line = lines[2].strip()
+        self.assertStartsWith(line, '/Child/jay/Favorites')
+        self.assertEndsWith(line, 'orange')
+
