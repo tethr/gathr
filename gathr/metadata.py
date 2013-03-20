@@ -1,11 +1,13 @@
 import colander
 import csv
+import datetime
 import imp
 import os
 import sys
 import yaml
 
 from churro import Persistent
+from churro import PersistentDatetime
 from churro import PersistentDict
 from churro import PersistentFolder
 from churro import PersistentProperty
@@ -189,6 +191,7 @@ class FormType(PersistentType):
 
 class Form(Persistent):
     data = PersistentProperty()
+    timestamp = PersistentDatetime()
 
     def __init__(self):
         self.data = PersistentDict()
@@ -202,6 +205,7 @@ class Form(Persistent):
 
     def update(self, data):
         self.data.update(data)
+        self.timestamp = datetime.datetime.now()
         datastream = self.__metadata__.datastreams[self.datastream]
         datastream.record(self._fs, self)
 

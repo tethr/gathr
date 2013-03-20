@@ -4,6 +4,7 @@ try: #pragma NO COVER
 except ImportError:
     import unittest
 
+import mock
 
 class MetadataTests(unittest.TestCase):
 
@@ -229,7 +230,11 @@ class MetadataTests(unittest.TestCase):
         schema = md.Root()['Manifesto'].schema()
         self.assertIsInstance(schema.get('foo').typ, colander.Int)
 
-    def test_form_update(self):
+    @mock.patch('gathr.metadata.datetime')
+    def test_form_update(self,  mocktime):
+        import datetime
+        timestamp = datetime.datetime(2012, 5, 12, 2, 42)
+        mocktime.datetime.now.return_value = timestamp
         yaml = ("resources:\n"
                 "  Study:\n"
                 "    forms:\n"
@@ -245,6 +250,7 @@ class MetadataTests(unittest.TestCase):
         root['Manifesto'] = form = root.addable_forms[0]()
         self.db.flush()
         form.update({'foo': 'hubba'})
+        self.assertEqual(form.timestamp, timestamp)
         fs = self.db.fs
         self.assertTrue(fs.exists('/datastreams/manifesto.csv'))
         header, data = fs.open('/datastreams/manifesto.csv', 'r').readlines()
