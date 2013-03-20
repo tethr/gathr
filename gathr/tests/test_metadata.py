@@ -7,6 +7,7 @@ except ImportError:
 import mock
 
 class MetadataTests(unittest.TestCase):
+    metadata = None
 
     def setUp(self):
         import tempfile
@@ -309,4 +310,29 @@ class MetadataTests(unittest.TestCase):
         line = lines[2].strip()
         self.assertStartsWith(line, '/Child/jay/Favorites')
         self.assertEndsWith(line, 'orange')
+
+    def test_datetime_field(self):
+        import datetime
+        yaml = ("resources:\n"
+                "  Study:\n"
+                "    forms:\n"
+                "      Manifesto:\n"
+                "        datastream: manifesto\n"
+                "datastreams:\n"
+                "  manifesto:\n"
+                "    -\n"
+                "      name: foo\n"
+                "      type: datetime\n")
+        self.make_one(yaml)
+        root = self.root()
+        root['Manifesto'] = form = root.addable_forms[0]()
+        self.db.flush()
+        bday = datetime.datetime(2010, 5, 12, 2, 42)
+        form.update({'foo': bday})
+        fs = self.db.fs
+        self.assertTrue(fs.exists('/datastreams/manifesto.csv'))
+        header, data = fs.open('/datastreams/manifesto.csv', 'r').readlines()
+        self.assertEqual(header, u'PATH,foo\n')
+        self.assertEqual(data, u'/Manifesto,2010-05-12 02:42:00\n')
+
 

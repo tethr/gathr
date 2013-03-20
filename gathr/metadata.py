@@ -31,6 +31,7 @@ class Metadata(object):
         self.load_resources(yaml_data.pop('resources'))
         self.load_datastreams(yaml_data.pop('datastreams', None))
         assert not yaml_data, "Unknown nodes in metadata: %s" % yaml_data
+        self.hook_import()
 
     def load_resources(self, resources):
         assert len(resources) == 1, "One and only one root resource allowed."
@@ -38,7 +39,6 @@ class Metadata(object):
         node['one_only'] = True
         self.Root = ResourceType.load(
             self, self.classes, self.dynamic_package, name, node)
-        self.hook_import()
 
     def load_datastreams(self, datastreams):
         if not datastreams:
@@ -282,3 +282,7 @@ class StringField(Field):
 class IntegerField(Field):
     schema_type = colander.Int
 
+
+@fieldtype('datetime')
+class DatetimeField(Field):
+    schema_type = colander.DateTime
