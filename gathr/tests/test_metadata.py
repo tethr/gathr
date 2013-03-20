@@ -334,4 +334,27 @@ class MetadataTests(unittest.TestCase):
         header, data = fs.open('/datastreams/manifesto.csv', 'r').readlines()
         self.assertTrue(data.endswith(u'2010-05-12 02:42:00\n'))
 
+    def test_date_field(self):
+        import datetime
+        yaml = ("resources:\n"
+                "  Study:\n"
+                "    forms:\n"
+                "      Manifesto:\n"
+                "        datastream: manifesto\n"
+                "datastreams:\n"
+                "  manifesto:\n"
+                "    -\n"
+                "      name: foo\n"
+                "      type: date\n")
+        self.make_one(yaml)
+        root = self.root()
+        root['Manifesto'] = form = root.addable_forms[0]()
+        self.db.flush()
+        bday = datetime.date(2010, 5, 12)
+        form.update({'foo': bday})
+        fs = self.db.fs
+        self.assertTrue(fs.exists('/datastreams/manifesto.csv'))
+        header, data = fs.open('/datastreams/manifesto.csv', 'r').readlines()
+        self.assertTrue(data.endswith(u'2010-05-12\n'), data)
+
 

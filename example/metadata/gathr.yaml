@@ -23,3 +23,9 @@ datastreams:
     - 
       name: Age
       type: integer
+    -
+      name: Time Admitted
+      type: datetime
+    -
+      name: Date of Birth
+      type: date

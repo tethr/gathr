@@ -287,3 +287,7 @@ class IntegerField(Field):
 @fieldtype('datetime')
 class DatetimeField(Field):
     schema_type = colander.DateTime
+
+@fieldtype('date')
+class DateField(Field):
+    schema_type = colander.Date
