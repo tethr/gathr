@@ -234,7 +234,7 @@ class MetadataTests(unittest.TestCase):
     @mock.patch('gathr.metadata.datetime')
     def test_form_update(self,  mocktime):
         import datetime
-        timestamp = datetime.datetime(2012, 5, 12, 2, 42)
+        timestamp = datetime.datetime(2010, 5, 12, 2, 42)
         mocktime.datetime.now.return_value = timestamp
         yaml = ("resources:\n"
                 "  Study:\n"
@@ -255,8 +255,8 @@ class MetadataTests(unittest.TestCase):
         fs = self.db.fs
         self.assertTrue(fs.exists('/datastreams/manifesto.csv'))
         header, data = fs.open('/datastreams/manifesto.csv', 'r').readlines()
-        self.assertEqual(header, u'PATH,foo\n')
-        self.assertEqual(data, u'/Manifesto,hubba\n')
+        self.assertEqual(header, u'PATH,TIMESTAMP,foo\n')
+        self.assertEqual(data, u'/Manifesto,2010-05-12 02:42:00,hubba\n')
 
     def test_form_insert_csv(self):
         yaml = ("resources:\n"
@@ -332,7 +332,6 @@ class MetadataTests(unittest.TestCase):
         fs = self.db.fs
         self.assertTrue(fs.exists('/datastreams/manifesto.csv'))
         header, data = fs.open('/datastreams/manifesto.csv', 'r').readlines()
-        self.assertEqual(header, u'PATH,foo\n')
-        self.assertEqual(data, u'/Manifesto,2010-05-12 02:42:00\n')
+        self.assertTrue(data.endswith(u'2010-05-12 02:42:00\n'))
 
 

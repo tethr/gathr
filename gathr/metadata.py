@@ -222,6 +222,7 @@ class Datastream(object):
             fs.mkdir('/datastreams')
         data = form.data.copy()
         data['PATH'] = path = resource_path(form)
+        data['TIMESTAMP'] = form.timestamp
         fpath = '/datastreams/%s.csv' % self.name
         if fs.exists(fpath):
             reader = csv.DictReader(fs.open(fpath, 'rb'))
@@ -242,7 +243,7 @@ class Datastream(object):
                 if path > row['PATH']:
                     writer.writerow(data)
         else:
-            fieldnames = ['PATH'] + form.data.keys()
+            fieldnames = ['PATH', 'TIMESTAMP'] + form.data.keys()
             with fs.open(fpath, 'wb') as out:
                 print >> out, ','.join(fieldnames)
                 writer = csv.DictWriter(out, fieldnames)
