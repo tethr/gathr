@@ -21,7 +21,7 @@ def form(context, request):
         except deform.ValidationFailure, e:
             form = e.render()
     else:
-        form = form.render(context.data)
+        form = form.render(context.data())
 
     return {
         'title': context.title,

@@ -7,8 +7,8 @@ import sys
 import yaml
 
 from churro import Persistent
+from churro import PersistentDate
 from churro import PersistentDatetime
-from churro import PersistentDict
 from churro import PersistentFolder
 from churro import PersistentProperty
 from churro import PersistentType
@@ -28,8 +28,8 @@ class Metadata(object):
         self.classes = {}
         self.dynamic_package = dynamic_package
         yaml_data = yaml.load(open(os.path.join(folder, filename)))
-        self.load_resources(yaml_data.pop('resources'))
         self.load_datastreams(yaml_data.pop('datastreams', None))
+        self.load_resources(yaml_data.pop('resources'))
         assert not yaml_data, "Unknown nodes in metadata: %s" % yaml_data
         self.hook_import()
 
@@ -171,8 +171,11 @@ class FormType(PersistentType):
 
     @classmethod
     def load(cls, metadata, types, package, name, node):
+        datastream = node.pop('datastream')
+        if datastream not in metadata.datastreams:
+            raise ValueError("No such datastream: %s" % datastream)
         members = {
-            'datastream': node.pop('datastream'),
+            'datastream': datastream,
             '__metadata__': metadata,
         }
         if 'display' in node:
@@ -180,6 +183,10 @@ class FormType(PersistentType):
         else:
             members['title'] = name
         name = make_name(types, name.title().replace(' ', ''))
+
+        datastream = metadata.datastreams[datastream]
+        for field in datastream.fields:
+            members[field.name] = field
 
         assert not node, "Unknown resource attributes: %s" % node
 
@@ -190,11 +197,7 @@ class FormType(PersistentType):
 
 
 class Form(Persistent):
-    data = PersistentProperty()
     timestamp = PersistentDatetime()
-
-    def __init__(self):
-        self.data = PersistentDict()
 
     def schema(self):
         datastream = self.__metadata__.datastreams[self.datastream]
@@ -204,10 +207,19 @@ class Form(Persistent):
         return schema
 
     def update(self, data):
-        self.data.update(data)
+        for name, value in data.iteritems():
+            setattr(self, name, value)
         self.timestamp = datetime.datetime.now()
         datastream = self.__metadata__.datastreams[self.datastream]
         datastream.record(self._fs, self)
+
+    def data(self):
+        data = {}
+        for cls in type(self).mro():
+            for field in cls.__dict__.values():
+                if isinstance(field, Field):
+                    data[field.name] = getattr(self, field.name)
+        return data
 
 
 class Datastream(object):
@@ -220,7 +232,8 @@ class Datastream(object):
     def record(self, fs, form):
         if not fs.exists('/datastreams'):
             fs.mkdir('/datastreams')
-        data = form.data.copy()
+        data = form.data()
+        data_keys = data.keys()
         data['PATH'] = path = resource_path(form)
         data['TIMESTAMP'] = form.timestamp
         fpath = '/datastreams/%s.csv' % self.name
@@ -243,7 +256,7 @@ class Datastream(object):
                 if path > row['PATH']:
                     writer.writerow(data)
         else:
-            fieldnames = ['PATH', 'TIMESTAMP'] + form.data.keys()
+            fieldnames = ['PATH', 'TIMESTAMP'] + data_keys
             with fs.open(fpath, 'wb') as out:
                 print >> out, ','.join(fieldnames)
                 writer = csv.DictWriter(out, fieldnames)
@@ -275,19 +288,19 @@ def fieldtype(name):
 
 
 @fieldtype('string')
-class StringField(Field):
+class StringField(Field, PersistentProperty):
     schema_type = colander.String
 
 
 @fieldtype('integer')
-class IntegerField(Field):
+class IntegerField(Field, PersistentProperty):
     schema_type = colander.Int
 
 
 @fieldtype('datetime')
-class DatetimeField(Field):
+class DatetimeField(Field, PersistentDatetime):
     schema_type = colander.DateTime
 
 @fieldtype('date')
-class DateField(Field):
+class DateField(Field, PersistentDate):
     schema_type = colander.Date

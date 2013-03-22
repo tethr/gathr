@@ -11,11 +11,14 @@ class MetadataTests(unittest.TestCase):
 
     def setUp(self):
         import tempfile
+        import transaction
+        transaction.abort()
         self.tmp = tempfile.mkdtemp('.gathr-tests')
-        self._root = None
 
     def tearDown(self):
         import shutil
+        import transaction
+        transaction.abort()
         shutil.rmtree(self.tmp)
         if self.metadata:
             self.metadata.unhook_import()
@@ -40,8 +43,7 @@ class MetadataTests(unittest.TestCase):
         import os
         datadir = os.path.join(self.tmp, 'data')
         self.db = churro.Churro(datadir, factory=self.metadata.Root)
-        self._root = self.db.root()
-        return self._root
+        return self.db.root()
 
     def test_create_resource_types(self):
         yaml = ("resources:\n"
@@ -171,12 +173,24 @@ class MetadataTests(unittest.TestCase):
         self.assertEqual(two.fields[1].name, 'B')
         self.assertIsInstance(two.fields[1], IntegerField)
 
-    def test_form(self):
+    def test_missing_datastream(self):
         yaml = ("resources:\n"
                 "  Study:\n"
                 "    forms:\n"
                 "      Manifesto:\n"
                 "        datastream: manifesto\n")
+        with self.assertRaises(ValueError):
+            self.make_one(yaml)
+
+
+    def test_form(self):
+        yaml = ("resources:\n"
+                "  Study:\n"
+                "    forms:\n"
+                "      Manifesto:\n"
+                "        datastream: manifesto\n"
+                "datastreams:\n"
+                "  manifesto: []\n")
         md = self.make_one(yaml)
         form = md.classes['Manifesto']
         self.assertEqual(form.datastream, 'manifesto')
@@ -190,7 +204,9 @@ class MetadataTests(unittest.TestCase):
                 "    forms:\n"
                 "      Manifesto:\n"
                 "        display: Hoo Ha!\n"
-                "        datastream: manifesto\n")
+                "        datastream: manifesto\n"
+                "datastreams:\n"
+                "  manifesto: []\n")
         md = self.make_one(yaml)
         form = md.classes['Manifesto']
         self.assertEqual(form.datastream, 'manifesto')
@@ -313,6 +329,7 @@ class MetadataTests(unittest.TestCase):
 
     def test_datetime_field(self):
         import datetime
+        import transaction
         yaml = ("resources:\n"
                 "  Study:\n"
                 "    forms:\n"
@@ -334,8 +351,12 @@ class MetadataTests(unittest.TestCase):
         header, data = fs.open('/datastreams/manifesto.csv', 'r').readlines()
         self.assertTrue(data.endswith(u'2010-05-12 02:42:00\n'))
 
+        transaction.commit()
+        root =  self.root()
+
     def test_date_field(self):
         import datetime
+        import transaction
         yaml = ("resources:\n"
                 "  Study:\n"
                 "    forms:\n"
@@ -357,4 +378,5 @@ class MetadataTests(unittest.TestCase):
         header, data = fs.open('/datastreams/manifesto.csv', 'r').readlines()
         self.assertTrue(data.endswith(u'2010-05-12\n'), data)
 
-
+        transaction.commit()
+        root =  self.root()
