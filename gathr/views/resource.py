@@ -1,4 +1,7 @@
+import transaction
+
 from pyramid.httpexceptions import HTTPFound
+from pyramid.traversal import resource_path
 from pyramid.view import view_config
 
 from ..metadata import Resource
@@ -40,6 +43,8 @@ def add_resource(context, request):
     folder = context[type_name]
     resource = resource_type.create(folder, request)
     resource_url = request.resource_url(resource)
+    transaction.get().note('Created %s: %s' % (
+        type_name, resource_path(resource)))
     if request.is_xhr:
         return {'resource_url': resource_url}
     return HTTPFound(resource_url)
