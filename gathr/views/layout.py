@@ -22,6 +22,9 @@ class Layout(object):
     def static(self, path):
         return self.request.static_url('gathr.views:static/' + path)
 
+    def deform(self, path):
+        return self.request.static_url('deform_bootstrap:static/' + path)
+
     @reify
     def breadcrumbs(self):
         breadcrumbs = deque()

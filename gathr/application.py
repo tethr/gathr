@@ -1,4 +1,8 @@
+import transaction
 from churro import Churro
+
+from pyramid.events import NewRequest
+from pyramid.events import subscriber
 from pyramid.config import Configurator
 
 from .metadata import Metadata
@@ -14,7 +18,7 @@ def main(global_config, **config):
     config.include('deform_bootstrap')
     config.include('pyramid_layout')
     config.include('pyramid_tm')
-    config.add_static_view('static', 'gathr.views:static')
+    config.add_static_view('/static', 'gathr.views:static')
     config.scan()
     return config.make_wsgi_app()
 
@@ -24,3 +28,8 @@ def root_factory(request):
     settings = request.registry.settings
     churro = Churro(settings['data'], factory=metadata.Root)
     return churro.root()
+
+
+@subscriber(NewRequest)
+def set_user(event):
+    transaction.get().setUser("Anonymous")

@@ -9,6 +9,7 @@
               href="${layout.static('css/bootstrap-responsive.min.css')}"/>
         <link rel="stylesheet" type="text/css" media="screen"
               href="${layout.static('css/gathr.css')}"/>
+        <metal:block define-slot="head-styles"></metal:block>
    </head>
    <body>
         <!-- Navbar -->

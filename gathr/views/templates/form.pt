@@ -7,4 +7,7 @@
             ${form}
        </div>
     </metal:block>
+    <metal:block fill-slot="tail-scripts">
+        <script src="${layout.deform('bootstrap-datepicker.js')}"></script>
+    </metal:block>
 </html>

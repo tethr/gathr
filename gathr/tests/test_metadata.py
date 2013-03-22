@@ -182,7 +182,6 @@ class MetadataTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.make_one(yaml)
 
-
     def test_form(self):
         yaml = ("resources:\n"
                 "  Study:\n"

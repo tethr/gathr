@@ -27,4 +27,3 @@ def form(context, request):
         'title': context.title,
         'form': HTML(form)
     }
-

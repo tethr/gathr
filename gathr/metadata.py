@@ -6,6 +6,8 @@ import os
 import sys
 import yaml
 
+from deform_bootstrap.widget import DateTimeInputWidget
+
 from churro import Persistent
 from churro import PersistentDate
 from churro import PersistentDatetime
@@ -265,6 +267,7 @@ class Datastream(object):
 
 class Field(object):
     types = {}
+    widget = None
 
     @classmethod
     def load(cls, node):
@@ -277,7 +280,11 @@ class Field(object):
         assert not node, "Unknown field attributes: %s" % node
 
     def field(self):
-        return colander.SchemaNode(self.schema_type(), name=self.name)
+        nodeargs = {'name': self.name}
+        if self.widget:
+            nodeargs['widget'] = self.widget()
+        return colander.SchemaNode(
+            self.schema_type(), **nodeargs)
 
 
 def fieldtype(name):
@@ -300,6 +307,8 @@ class IntegerField(Field, PersistentProperty):
 @fieldtype('datetime')
 class DatetimeField(Field, PersistentDatetime):
     schema_type = colander.DateTime
+    widget = DateTimeInputWidget
+
 
 @fieldtype('date')
 class DateField(Field, PersistentDate):
