@@ -16,9 +16,13 @@ from churro import PersistentProperty
 from churro import PersistentType
 
 from pyramid.httpexceptions import HTTPConflict
+from pyramid.path import DottedNameResolver
 from pyramid.traversal import resource_path
 
 from .utils import make_name
+
+
+resolve_dotted_name = DottedNameResolver().resolve
 
 
 class Metadata(object):
@@ -66,8 +70,15 @@ class Metadata(object):
         sys.meta_path.append(self)
 
     def unhook_import(self):
-        if self.dynamic_package in sys.modules:
-            del sys.modules[self.dynamic_package]
+        dynamic_package = self.dynamic_package
+        if '.' in dynamic_package:
+            base, dynamic = dynamic_package.rsplit('.', 1)
+            package = resolve_dotted_name(base)
+            module = getattr(package, dynamic, None)
+            if module and module.__loader__ is self:
+                delattr(package, dynamic)
+        if dynamic_package in sys.modules:
+            del sys.modules[dynamic_package]
         sys.meta_path.remove(self)
 
 

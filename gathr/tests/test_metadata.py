@@ -352,6 +352,7 @@ class MetadataTests(unittest.TestCase):
 
         transaction.commit()
         root =  self.root()
+        self.assertEqual(root['Manifesto'].foo, bday)
 
     def test_date_field(self):
         import datetime
@@ -379,3 +380,4 @@ class MetadataTests(unittest.TestCase):
 
         transaction.commit()
         root =  self.root()
+        self.assertEqual(root['Manifesto'].foo, bday)
