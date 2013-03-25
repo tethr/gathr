@@ -381,3 +381,29 @@ class MetadataTests(unittest.TestCase):
         transaction.commit()
         root =  self.root()
         self.assertEqual(root['Manifesto'].foo, bday)
+
+    def test_text_field(self):
+        import transaction
+        yaml = ("resources:\n"
+                "  Study:\n"
+                "    forms:\n"
+                "      Manifesto:\n"
+                "        datastream: manifesto\n"
+                "datastreams:\n"
+                "  manifesto:\n"
+                "    -\n"
+                "      name: foo\n"
+                "      type: text\n")
+        self.make_one(yaml)
+        root = self.root()
+        root['Manifesto'] = form = root.addable_forms[0]()
+        self.db.flush()
+        form.update({'foo': 'Happy Birthday!'})
+        fs = self.db.fs
+        self.assertTrue(fs.exists('/datastreams/manifesto.csv'))
+        header, data = fs.open('/datastreams/manifesto.csv', 'r').readlines()
+        self.assertTrue(data.endswith(u'Happy Birthday!\n'), data)
+
+        transaction.commit()
+        root =  self.root()
+        self.assertEqual(root['Manifesto'].foo, 'Happy Birthday!')

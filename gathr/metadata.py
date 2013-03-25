@@ -1,6 +1,7 @@
 import colander
 import csv
 import datetime
+import deform.widget
 import imp
 import os
 import sys
@@ -287,11 +288,12 @@ class Field(object):
 
     def __init__(self, node):
         self.name = node.pop('name')
+        self.title = node.pop('display', self.name)
 
         assert not node, "Unknown field attributes: %s" % node
 
     def field(self):
-        nodeargs = {'name': self.name}
+        nodeargs = {'name': self.name, 'title': self.title}
         if self.widget:
             nodeargs['widget'] = self.widget()
         return colander.SchemaNode(
@@ -324,3 +326,11 @@ class DatetimeField(Field, PersistentDatetime):
 @fieldtype('date')
 class DateField(Field, PersistentDate):
     schema_type = colander.Date
+
+
+@fieldtype('text')
+class TextFeild(Field, PersistentProperty):
+    schema_type = colander.String
+
+    def widget(self):
+        return deform.widget.TextAreaWidget(rows=8, css_class="input-xlarge")
