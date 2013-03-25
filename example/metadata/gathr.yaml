@@ -29,6 +29,10 @@ datastreams:
     -
       name: Date of Birth
       type: date
+    - 
+      name: Alive
+      display: Alive at time of visit?
+      type: boolean
     -
       name: Sex
       type: choose one

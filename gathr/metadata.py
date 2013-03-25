@@ -343,6 +343,12 @@ class IntegerField(Field, PersistentProperty):
     schema_type = colander.Int
 
 
+@fieldtype('boolean')
+class BooleanField(Field, PersistentProperty):
+    schema_type = colander.Boolean
+    widget = deform.widget.CheckboxWidget
+
+
 @fieldtype('datetime')
 class DatetimeField(Field, PersistentDatetime):
     schema_type = colander.DateTime
