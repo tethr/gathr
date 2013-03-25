@@ -30,6 +30,29 @@ datastreams:
       name: Date of Birth
       type: date
     -
+      name: Sex
+      type: choose one
+      choices: [male, female]
+    -
+      name: Choice
+      type: choose one
+      choices:
+        - One
+        - Two
+        - Three
+        - Four
+        - Five
+        - Six
+    -
+      name: Symptoms
+      type: choose many
+      choices:
+        - Grumpy
+        - Snotty
+        - Farty
+        - Stinky
+        - Bees
+    -
       name: Teleology
       display: Why are we here?
       type: text

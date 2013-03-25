@@ -17,6 +17,7 @@ from churro import PersistentProperty
 from churro import PersistentType
 
 from pyramid.httpexceptions import HTTPConflict
+from pyramid.i18n import TranslationStringFactory
 from pyramid.path import DottedNameResolver
 from pyramid.traversal import resource_path
 
@@ -24,6 +25,7 @@ from .utils import make_name
 
 
 resolve_dotted_name = DottedNameResolver().resolve
+_ = TranslationStringFactory('gathr')
 
 
 class Metadata(object):
@@ -235,6 +237,15 @@ class Form(Persistent):
                     data[field.name] = getattr(self, field.name)
         return data
 
+    def csv_data(self):
+        data = {}
+        for cls in type(self).mro():
+            for field in cls.__dict__.values():
+                if isinstance(field, Field):
+                    data[field.name] = field.to_csv(getattr(self, field.name))
+        return data
+
+
 
 class Datastream(object):
 
@@ -246,7 +257,7 @@ class Datastream(object):
     def record(self, fs, form):
         if not fs.exists('/datastreams'):
             fs.mkdir('/datastreams')
-        data = form.data()
+        data = form.csv_data()
         data_keys = data.keys()
         data['PATH'] = path = resource_path(form)
         data['TIMESTAMP'] = form.timestamp
@@ -277,6 +288,17 @@ class Datastream(object):
                 writer.writerow(data)
 
 
+class PersistentSet(PersistentProperty):
+
+    def from_json(self, value):
+        if value is not None:
+            return set(value)
+
+    def to_json(self, value):
+        if value is not None:
+            return list(value)
+
+
 class Field(object):
     types = {}
     widget = None
@@ -298,6 +320,10 @@ class Field(object):
             nodeargs['widget'] = self.widget()
         return colander.SchemaNode(
             self.schema_type(), **nodeargs)
+
+    def to_csv(self, value):
+        if value is not None:
+            return str(value)
 
 
 def fieldtype(name):
@@ -329,8 +355,47 @@ class DateField(Field, PersistentDate):
 
 
 @fieldtype('text')
-class TextFeild(Field, PersistentProperty):
+class TextField(Field, PersistentProperty):
     schema_type = colander.String
 
     def widget(self):
         return deform.widget.TextAreaWidget(rows=8, css_class="input-xlarge")
+
+
+@fieldtype('choose one')
+class ChooseOneField(Field, PersistentProperty):
+    schema_type = colander.String
+    break_point = 4
+
+    def __init__(self, node):
+        self.choices = node.pop('choices')
+        super(ChooseOneField, self).__init__(node)
+
+    def widget(self):
+        choices = [
+            (choice, choice) for choice in self.choices]
+        if len(self.choices) <= self.break_point:
+            widget = deform.widget.RadioChoiceWidget
+        else:
+            widget = deform.widget.SelectWidget
+            choices.insert(0, ('', _('Choose one')))
+        return widget(values=choices)
+
+
+@fieldtype('choose many')
+class ChooseManyField(Field, PersistentSet):
+    schema_type = colander.Set
+    break_point = 4
+
+    def __init__(self, node):
+        self.choices = node.pop('choices')
+        super(ChooseManyField, self).__init__(node)
+
+    def widget(self):
+        choices = [
+            (choice, choice) for choice in self.choices]
+        return deform.widget.CheckboxChoiceWidget(values=choices)
+
+    def to_csv(self, value):
+        if value:
+            return '|'.join(value)

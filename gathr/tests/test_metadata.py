@@ -351,7 +351,7 @@ class MetadataTests(unittest.TestCase):
         self.assertTrue(data.endswith(u'2010-05-12 02:42:00\n'))
 
         transaction.commit()
-        root =  self.root()
+        root = self.root()
         self.assertEqual(root['Manifesto'].foo, bday)
 
     def test_date_field(self):
@@ -379,7 +379,7 @@ class MetadataTests(unittest.TestCase):
         self.assertTrue(data.endswith(u'2010-05-12\n'), data)
 
         transaction.commit()
-        root =  self.root()
+        root = self.root()
         self.assertEqual(root['Manifesto'].foo, bday)
 
     def test_text_field(self):
@@ -405,5 +405,65 @@ class MetadataTests(unittest.TestCase):
         self.assertTrue(data.endswith(u'Happy Birthday!\n'), data)
 
         transaction.commit()
-        root =  self.root()
+        root = self.root()
         self.assertEqual(root['Manifesto'].foo, 'Happy Birthday!')
+
+    def test_choose_one_field(self):
+        import transaction
+        yaml = ("resources:\n"
+                "  Study:\n"
+                "    forms:\n"
+                "      Manifesto:\n"
+                "        datastream: manifesto\n"
+                "datastreams:\n"
+                "  manifesto:\n"
+                "    -\n"
+                "      name: foo\n"
+                "      type: choose one\n"
+                "      choices:\n"
+                "        - One\n"
+                "        - Two\n"
+                "        - Three\n")
+        self.make_one(yaml)
+        root = self.root()
+        root['Manifesto'] = form = root.addable_forms[0]()
+        self.db.flush()
+        form.update({'foo': 'Two'})
+        fs = self.db.fs
+        self.assertTrue(fs.exists('/datastreams/manifesto.csv'))
+        header, data = fs.open('/datastreams/manifesto.csv', 'r').readlines()
+        self.assertTrue(data.endswith(u'Two\n'), data)
+
+        transaction.commit()
+        root = self.root()
+        self.assertEqual(root['Manifesto'].foo, 'Two')
+
+    def test_choose_many_field(self):
+        import transaction
+        yaml = ("resources:\n"
+                "  Study:\n"
+                "    forms:\n"
+                "      Manifesto:\n"
+                "        datastream: manifesto\n"
+                "datastreams:\n"
+                "  manifesto:\n"
+                "    -\n"
+                "      name: foo\n"
+                "      type: choose many\n"
+                "      choices:\n"
+                "        - One\n"
+                "        - Two\n"
+                "        - Three\n")
+        self.make_one(yaml)
+        root = self.root()
+        root['Manifesto'] = form = root.addable_forms[0]()
+        self.db.flush()
+        form.update({'foo': set(['Two', 'Three'])})
+        fs = self.db.fs
+        self.assertTrue(fs.exists('/datastreams/manifesto.csv'))
+        header, data = fs.open('/datastreams/manifesto.csv', 'r').readlines()
+        self.assertTrue(data.endswith(u'Two|Three\n'), data)
+
+        transaction.commit()
+        root = self.root()
+        self.assertEqual(root['Manifesto'].foo, set(['Two', 'Three']))
