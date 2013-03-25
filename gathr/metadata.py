@@ -343,6 +343,21 @@ class IntegerField(Field, PersistentProperty):
     schema_type = colander.Int
 
 
+@fieldtype('float')
+class FloatField(Field, PersistentProperty):
+    schema_type = colander.Float
+
+    def __init__(self, node):
+        self.units = node.pop('units', None)
+        super(FloatField, self).__init__(node)
+
+        if not self.units:
+            self.widget = None
+
+    def widget(self):
+        return deform.widget.TextInputWidget(input_append=self.units)
+
+
 @fieldtype('boolean')
 class BooleanField(Field, PersistentProperty):
     schema_type = colander.Boolean

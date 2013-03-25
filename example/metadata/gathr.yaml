@@ -38,6 +38,13 @@ datastreams:
       type: choose one
       choices: [male, female]
     -
+      name: Number
+      type: float
+    -
+      name: Weight
+      type: float
+      units: kg
+    -
       name: Choice
       type: choose one
       choices:
