@@ -302,6 +302,7 @@ class PersistentSet(PersistentProperty):
 class Field(object):
     types = {}
     widget = None
+    missing = None
 
     @classmethod
     def load(cls, node):
@@ -311,6 +312,7 @@ class Field(object):
     def __init__(self, node):
         self.name = node.pop('name')
         self.title = node.pop('display', self.name)
+        self.required = node.pop('required', True)
 
         assert not node, "Unknown field attributes: %s" % node
 
@@ -318,6 +320,8 @@ class Field(object):
         nodeargs = {'name': self.name, 'title': self.title}
         if self.widget:
             nodeargs['widget'] = self.widget()
+        if not self.required:
+            nodeargs['missing'] = self.missing
         return colander.SchemaNode(
             self.schema_type(), **nodeargs)
 
@@ -407,6 +411,7 @@ class ChooseOneField(Field, PersistentProperty):
 class ChooseManyField(Field, PersistentSet):
     schema_type = colander.Set
     break_point = 4
+    required = False
 
     def __init__(self, node):
         self.choices = node.pop('choices')

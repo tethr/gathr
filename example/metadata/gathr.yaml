@@ -40,6 +40,7 @@ datastreams:
     -
       name: Number
       type: float
+      required: false
     -
       name: Weight
       type: float
@@ -67,3 +68,4 @@ datastreams:
       name: Teleology
       display: Why are we here?
       type: text
+      required: false
