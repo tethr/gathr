@@ -246,7 +246,6 @@ class Form(Persistent):
         return data
 
 
-
 class Datastream(object):
 
     def __init__(self, metadata, name, fields):
@@ -303,6 +302,7 @@ class Field(object):
     types = {}
     widget = None
     missing = None
+    required = True
 
     @classmethod
     def load(cls, node):
@@ -312,7 +312,7 @@ class Field(object):
     def __init__(self, node):
         self.name = node.pop('name')
         self.title = node.pop('display', self.name)
-        self.required = node.pop('required', True)
+        self.required = node.pop('required', self.required)
 
         assert not node, "Unknown field attributes: %s" % node
 
@@ -322,6 +322,7 @@ class Field(object):
             nodeargs['widget'] = self.widget()
         if not self.required:
             nodeargs['missing'] = self.missing
+        nodeargs['required'] = False
         return colander.SchemaNode(
             self.schema_type(), **nodeargs)
 
