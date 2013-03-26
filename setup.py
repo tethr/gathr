@@ -62,7 +62,4 @@ setup(name='gathr',
       entry_points="""\
       [paste.app_factory]
       main = gathr.application:main
-
-      [console_scripts]
-      gathr = gathr.scripts.main:main
       """)
