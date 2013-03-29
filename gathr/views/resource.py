@@ -6,9 +6,12 @@ from pyramid.view import view_config
 
 from ..metadata import Resource
 from ..metadata import ResourceContainer
+from ..security import READ
+from ..security import WRITE
 
 
-@view_config(context=Resource, renderer="templates/view_resource.pt")
+@view_config(context=Resource, permission=READ,
+             renderer="templates/view_resource.pt")
 def view_resource(context, request):
     types = []
     for resource_type in context.addable_types:
@@ -35,7 +38,7 @@ def view_resource(context, request):
             'children': children}
 
 
-@view_config(context=Resource, name='add', renderer='json')
+@view_config(context=Resource, name='add', permission=WRITE, renderer='json')
 def add_resource(context, request):
     type_name = request.params['type']
     metadata = request.registry.metadata

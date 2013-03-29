@@ -16,12 +16,16 @@ from churro import PersistentFolder
 from churro import PersistentProperty
 from churro import PersistentType
 
+from pyramid.decorator import reify
 from pyramid.httpexceptions import HTTPConflict
 from pyramid.i18n import TranslationStringFactory
 from pyramid.path import DottedNameResolver
+from pyramid.security import Allow
 from pyramid.traversal import resource_path
 
+from .security import GROUPS
 from .utils import make_name
+from .utils import PersistentSetProperty
 
 
 resolve_dotted_name = DottedNameResolver().resolve
@@ -166,6 +170,16 @@ class ResourceType(PersistentType):
 
 
 class Resource(PersistentFolder):
+    @reify
+    def __acl__(self):
+        path = resource_path(self)
+        return [
+            (Allow, '%s:%s' % (name, path), group['permissions'])
+            for name, group in GROUPS.items()]
+
+    def _group(self, name):
+        assert name in GROUPS
+        return '%s:%s' % (name, resource_path(self))
 
     def __init__(self):
         for T in self.singleton_types:
@@ -287,17 +301,6 @@ class Datastream(object):
                 writer.writerow(data)
 
 
-class PersistentSet(PersistentProperty):
-
-    def from_json(self, value):
-        if value is not None:
-            return set(value)
-
-    def to_json(self, value):
-        if value is not None:
-            return list(value)
-
-
 class Field(object):
     types = {}
     widget = None
@@ -409,7 +412,7 @@ class ChooseOneField(Field, PersistentProperty):
 
 
 @fieldtype('choose many')
-class ChooseManyField(Field, PersistentSet):
+class ChooseManyField(Field, PersistentSetProperty):
     schema_type = colander.Set
     break_point = 4
     required = False

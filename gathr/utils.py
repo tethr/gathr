@@ -1,8 +1,8 @@
-"""
-Stolen shamelessly from Karl (http://karlproject.org).
-"""
 import os
 import re
+
+from churro import PersistentProperty
+
 
 _convert_to_dashes = re.compile(r"""[\s/:"']""") # ' damn you emacs
 _safe_char_check = re.compile(r"[\w.-]+$")
@@ -142,3 +142,17 @@ def make_unique_name_and_postfix(context, title):
 class HTML(unicode):
     def __html__(self):
         return self
+
+
+class PersistentSetProperty(PersistentProperty):
+
+    def from_json(self, value):
+        if value is not None:
+            return set(value)
+
+    def to_json(self, value):
+        if value is not None:
+            return list(value)
+
+
+
