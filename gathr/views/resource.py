@@ -5,7 +5,6 @@ from pyramid.traversal import resource_path
 from pyramid.view import view_config
 
 from ..metadata import Resource
-from ..metadata import ResourceContainer
 from ..security import READ
 from ..security import WRITE
 
@@ -31,7 +30,7 @@ def view_resource(context, request):
 
     children = [{'title': child.title, 'url': request.resource_url(child)}
                 for child in context.values()
-                if not isinstance(child, ResourceContainer)]
+                if isinstance(child, Resource)]
 
     return {'title': context.title,
             'types': types,

@@ -51,6 +51,7 @@ def main(argv=sys.argv[1:]):
 
     user = User(fullname, email)
     users[args.userid] = user
+    user.set_password(pass1)
     user.add_to_group(root, MANAGERS)
 
     transaction.commit()

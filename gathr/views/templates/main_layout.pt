@@ -17,6 +17,12 @@
             <div class="navbar-inner">
                 <a class="brand" 
                    href="${request.application_url}">${layout.brand}</a>
+                <ul class="nav pull-right">
+                    <li><p class="navbar-text">${layout.login_info}</p></li>
+                    <li>
+                        <a href="${layout.logout.url}">${layout.logout.label}</a>
+                    </li>
+                </ul>
             </div>
         </div>
 

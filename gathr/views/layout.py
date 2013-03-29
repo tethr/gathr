@@ -10,8 +10,8 @@ _ = TranslationStringFactory('gathr')
 from ..metadata import ResourceContainer
 
 
-@layout_config(template="templates/main_layout.pt")
-class Layout(object):
+@layout_config(name='anonymous', template='templates/anonymous_layout.pt')
+class AnonymousLayout(object):
     brand = _('Gathr')
     page_title = _('Gathr')
 
@@ -26,6 +26,21 @@ class Layout(object):
         return self.request.static_url('deform_bootstrap:static/' + path)
 
     @reify
+    def flash(self):
+        return ' '.join(self.request.session.pop_flash())
+
+
+@layout_config(template="templates/main_layout.pt")
+class MainLayout(AnonymousLayout):
+
+    def __init__(self, context, request):
+        super(MainLayout, self).__init__(context, request)
+        self.login_info = _("You are logged in as ${name}",
+                            mapping={'name': request.user.fullname})
+        self.logout = {'label': _("logout"),
+                       'url': request.resource_url(request.root, 'logout')}
+
+    @reify
     def breadcrumbs(self):
         breadcrumbs = deque()
         node = self.context
@@ -37,3 +52,5 @@ class Layout(object):
                     'url': url(node)})
             node = node.__parent__
         return breadcrumbs
+
+

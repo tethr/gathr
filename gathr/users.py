@@ -1,7 +1,11 @@
+from cryptacular.bcrypt import BCRYPTPasswordManager
+
 from churro import Persistent
 from churro import PersistentFolder
 from churro import PersistentList
 from churro import PersistentProperty
+
+bcrypt = BCRYPTPasswordManager()
 
 
 class UsersFolder(PersistentFolder):
@@ -9,6 +13,7 @@ class UsersFolder(PersistentFolder):
 
 
 class User(Persistent):
+    password = PersistentProperty()
     fullname = PersistentProperty()
     email = PersistentProperty()
     groups = PersistentProperty()
@@ -22,3 +27,9 @@ class User(Persistent):
         group = context._group(group_name)
         if group not in self.groups:
             self.groups.append(group)
+
+    def set_password(self, password):
+        self.password = bcrypt.encode(password)
+
+    def check_password(self, password):
+        return bcrypt.check(self.password, password)

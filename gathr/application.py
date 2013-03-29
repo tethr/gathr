@@ -4,6 +4,7 @@ from churro import Churro
 from pyramid.authentication import AuthTktAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid.config import Configurator
+from pyramid.session import UnencryptedCookieSessionFactoryConfig
 
 from .metadata import Metadata
 from .users import UsersFolder
@@ -23,6 +24,8 @@ def main(global_config, **config):
     config.include('pyramid_layout')
     config.include('pyramid_tm')
     config.add_static_view('/static', 'gathr.views:static')
+    config.set_session_factory(
+        UnencryptedCookieSessionFactoryConfig(settings['secret']))
     config.scan()
     return config.make_wsgi_app()
 
@@ -39,18 +42,15 @@ def root_factory(request):
 
 
 def find_user(userid, request):
-    root = request.root
-    if 'users' in root:
-        users = root['users']
-        user = users.get(userid)
-        if user:
-            tx = transaction.get()
-            if user.fullname:
-                tx.setUser(user.fullname)
-            else:
-                tx.setUser(userid)
-            if user.email:
-                tx.setExtendedInfo('email', user.email)
-            request.user = user
-            return user.groups
-
+    users = request.root['users']
+    user = users.get(userid)
+    if user:
+        tx = transaction.get()
+        if user.fullname:
+            tx.setUser(user.fullname)
+        else:
+            tx.setUser(userid)
+        if user.email:
+            tx.setExtendedInfo('email', user.email)
+        request.user = user
+        return user.groups
