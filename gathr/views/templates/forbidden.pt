@@ -1,0 +1,4 @@
+<html metal:use-macro="main_template" i18n:domain="gathr">
+    <div metal:fill-slot="content" i18n:translate=""
+        >You do not have permission to view this page.</div>
+</html>

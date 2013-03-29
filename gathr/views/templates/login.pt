@@ -1,0 +1,5 @@
+<html metal:use-macro="main_template">
+    <div metal:fill-slot="content">
+        ${form}
+    </div>
+</html>
