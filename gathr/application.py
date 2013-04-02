@@ -1,3 +1,5 @@
+import deform
+import pkg_resources
 import transaction
 from churro import Churro
 
@@ -27,6 +29,7 @@ def main(global_config, **config):
     config.set_session_factory(
         UnencryptedCookieSessionFactoryConfig(settings['secret']))
     config.scan()
+    add_deform_search_path()
     return config.make_wsgi_app()
 
 
@@ -54,3 +57,16 @@ def find_user(userid, request):
             tx.setExtendedInfo('email', user.email)
         request.user = user
         return user.groups
+
+
+def add_deform_search_path():
+    """
+    We do read only forms differently than standard deform, so we need to get
+    our own widget templates on the search path.  This should be called after
+    deform_bootstrap has been included in the config.
+    """
+    loader = deform.Form.default_renderer.loader
+    loader.search_path = (
+        pkg_resources.resource_filename('gathr.views', 'forms'),
+        ) + loader.search_path
+

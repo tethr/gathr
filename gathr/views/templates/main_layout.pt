@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" i18n:domain="gathr">
     <head>
         <title>${layout.page_title}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,7 +18,13 @@
                 <a class="brand" 
                    href="${request.application_url}">${layout.brand}</a>
                 <ul class="nav pull-right">
-                    <li><p class="navbar-text">${layout.login_info}</p></li>
+                    <li>
+                    <p class="navbar-text" i18n:translate="">
+                        You are logged in as
+                        <a href="${layout.user_url}" i18n:name="name"
+                           tal:content="request.user.fullname">name</a>
+                        </p>
+                    </li>
                     <li>
                         <a href="${layout.logout.url}">${layout.logout.label}</a>
                     </li>

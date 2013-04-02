@@ -1,0 +1,25 @@
+<span i18n:domain="deform" tal:omit-tag="">
+<div class="row">
+    <div class="input-prepend span2">
+      <span class="add-on" i18n:translate="">Year</span
+      ><input type="text" name="year" value="${year}"
+              class="span1 ${field.widget.css_class}"
+              tal:attributes="size field.widget.size; maxlength field.widget.size"
+              id="${field.oid}" disabled=""/>
+    </div>
+    <div class="input-prepend span2">
+      <span class="add-on" i18n:translate="">Month</span
+      ><input type="text" name="month" value="${month}"
+              class="span1 ${field.widget.css_class}"
+              tal:attributes="size field.widget.size; maxlength field.widget.size"
+              id="${field.oid}-month" disabled=""/>
+    </div>
+    <div class="input-prepend span2">
+      <span class="add-on" i18n:translate="">Day</span
+      ><input type="text" name="day" value="${day}"
+              class="span1 ${field.widget.css_class}"
+              tal:attributes="size field.widget.size; maxlength field.widget.size"
+              id="${field.oid}-day" disabled=""/>
+    </div>
+</div>
+</span>

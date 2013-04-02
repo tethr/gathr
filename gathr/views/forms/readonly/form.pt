@@ -1,0 +1,19 @@
+<form
+  id="${field.formid}"
+  class="deform ${field.bootstrap_form_style | 'form-horizontal'}
+         ${field.css_class}"
+  i18n:domain="deform"
+  tal:define="inline getattr(field, 'bootstrap_form_style', None) == 'form-inline'">
+  
+  <fieldset>
+    <legend tal:condition="field.title">${field.title}</legend>
+
+    <div
+        tal:define="rndr field.renderer;
+                    tmpl field.widget.item_template"
+        tal:repeat="f field.children"
+        tal:replace="structure
+                     rndr(tmpl,field=f,cstruct=cstruct.get(f.name, null))" />
+  </fieldset>
+
+</form>

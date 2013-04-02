@@ -1,0 +1,7 @@
+<div>
+  <input type="text" name="${field.name}" value="${cstruct}"
+         tal:attributes="size field.widget.size;
+                         class field.widget.css_class;
+                         placeholder subject;"
+         id="${field.oid}" disabled=""/>
+</div>

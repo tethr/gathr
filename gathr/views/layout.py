@@ -35,8 +35,7 @@ class MainLayout(AnonymousLayout):
 
     def __init__(self, context, request):
         super(MainLayout, self).__init__(context, request)
-        self.login_info = _("You are logged in as ${name}",
-                            mapping={'name': request.user.fullname})
+        self.user_url = request.resource_url(request.user)
         self.logout = {'label': _("logout"),
                        'url': request.resource_url(request.root, 'logout')}
 
@@ -52,5 +51,3 @@ class MainLayout(AnonymousLayout):
                     'url': url(node)})
             node = node.__parent__
         return breadcrumbs
-
-

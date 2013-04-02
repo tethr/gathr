@@ -155,4 +155,9 @@ class PersistentSetProperty(PersistentProperty):
             return list(value)
 
 
+def make_readonly(field):
+    field.widget.readonly = True
+    field.required = False
+    for child in field.children:
+        make_readonly(child)
 

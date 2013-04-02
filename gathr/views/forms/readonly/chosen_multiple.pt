@@ -1,0 +1,12 @@
+  <select name="${field.name}"
+          id="${field.oid}"
+          multiple="multiple"
+          class="i-can-haz-chzn-select"
+          tal:attributes="size field.widget.size;
+                          data-placeholder getattr(field.widget, 'placeholder', nothing)"
+          disabled="">
+   <option tal:repeat="(value, description) values"
+           tal:attributes="selected value in cstruct and 'selected';
+                           class field.widget.css_class"
+           value="${value}">${description}</option>
+  </select>

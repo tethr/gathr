@@ -29,7 +29,4 @@ def form(context, request):
     else:
         form = form.render(context.data())
 
-    return {
-        'title': context.title,
-        'form': HTML(form)
-    }
+    return {'form': HTML(form)}
