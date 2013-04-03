@@ -16,7 +16,7 @@ from ..utils import make_readonly
 @view_config(context=Form, renderer='templates/form.pt', permission=READ)
 def form(context, request):
     form = deform.Form(context.schema(), buttons=('Save changes',))
-    editable = has_permission(WRITE + 'fu', context, request)
+    editable = has_permission(WRITE, context, request)
     if editable and request.method == 'POST':
         try:
             created = not filter(None, context.data().values())
