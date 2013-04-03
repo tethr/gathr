@@ -4,6 +4,7 @@ from pyramid.httpexceptions import HTTPFound
 from pyramid.traversal import resource_path
 from pyramid.view import view_config
 
+from ..metadata import Form
 from ..metadata import Resource
 from ..security import READ
 from ..security import WRITE
@@ -30,7 +31,7 @@ def view_resource(context, request):
 
     children = [{'title': child.title, 'url': request.resource_url(child)}
                 for child in context.values()
-                if isinstance(child, Resource)]
+                if isinstance(child, (Resource, Form))]
 
     return {'title': context.title,
             'types': types,

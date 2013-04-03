@@ -2,20 +2,22 @@ import deform
 import transaction
 
 from pyramid.httpexceptions import HTTPFound
+from pyramid.security import has_permission
 from pyramid.traversal import resource_path
 from pyramid.view import view_config
 
 from ..metadata import Form
+from ..security import READ
+from ..security import WRITE
 from ..utils import HTML
+from ..utils import make_readonly
 
 
-@view_config(context=Form, renderer='templates/form.pt')
+@view_config(context=Form, renderer='templates/form.pt', permission=READ)
 def form(context, request):
-    if 'cancel' in request.params:
-        return HTTPFound(request.resource_url(context.__parent__))
-
-    form = deform.Form(context.schema(), buttons=('submit', 'cancel'))
-    if 'submit' in request.params:
+    form = deform.Form(context.schema(), buttons=('Save changes',))
+    editable = has_permission(WRITE + 'fu', context, request)
+    if editable and request.method == 'POST':
         try:
             created = not filter(None, context.data().values())
             data = form.validate(request.params.items())
@@ -25,8 +27,12 @@ def form(context, request):
                 verb, resource_path(context)))
             return HTTPFound(request.resource_url(context.__parent__))
         except deform.ValidationFailure, e:
-            form = e.render()
+            rendered = HTML(e.render())
     else:
-        form = form.render(context.data())
+        if not editable:
+            make_readonly(form)
+        rendered = HTML(form.render(context.data()))
 
-    return {'form': HTML(form)}
+    layout = request.layout_manager.layout
+    layout.page_title = context.title
+    return {'form': rendered}

@@ -156,7 +156,13 @@ class PersistentSetProperty(PersistentProperty):
 
 
 def make_readonly(field):
+    """
+    It's pretty clear that no one actually uses read only templates in deform.
+    This is a giant kludge to work around extremely brittle system.  I should be
+    nice and fix it upstream when I get some "time".
+    """
     field.widget.readonly = True
+    field.widget.template = field.widget.readonly_template
     field.required = False
     for child in field.children:
         make_readonly(child)

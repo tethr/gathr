@@ -70,3 +70,6 @@ def add_deform_search_path():
         pkg_resources.resource_filename('gathr.views', 'forms'),
         ) + loader.search_path
 
+    # OMG monkey patch!  Consider fixing readonly forms upstream.
+    from deform_bootstrap.widget import DateTimeInputWidget as widget
+    widget.readonly_template = 'readonly/splitted_datetimeinput'
