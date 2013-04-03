@@ -22,7 +22,7 @@ def view_user(context, request):
     if request.referrer and 'came_from' not in request.session:
         request.session['came_from'] = request.referrer
     editable = has_permission(WRITE, context, request)
-    schema = UserSchema()
+    schema = UserSchema().bind(context=context)
     form = deform.Form(schema, buttons=(_('Save changes'),))
     if editable and request.method == 'POST':
         try:
@@ -31,13 +31,18 @@ def view_user(context, request):
             context.email = data.get('email', context.email)
             if data['password']:
                 context.set_password(data['password'])
+            if data['userid'] != context.__name__:
+                folder = context.__parent__
+                del folder[context.__name__]
+                folder[data['userid']] = context
             redirect_to = request.session.pop(
                 'came_from', request.application_url)
             return HTTPFound(redirect_to)
         except deform.ValidationFailure, form:
             rendered = HTML(form.render())
     else:
-        data = {'fullname': context.fullname, 'email': context.email}
+        data = {'userid': context.__name__, 'fullname': context.fullname,
+                'email': context.email}
         if not editable:
             make_readonly(form)
         rendered = HTML(form.render(data))
@@ -45,7 +50,20 @@ def view_user(context, request):
     return {'form': rendered}
 
 
+@colander.deferred
+def unique_or_unchanged_name(node, kw):
+    user = kw['context']
+    def validator(node, cstruct):
+        if cstruct != user.__name__ and cstruct in user.__parent__:
+            raise colander.Invalid(
+                node, _('A user with that id already exists.'))
+    return validator
+
+
 class UserSchema(colander.Schema):
+    userid = colander.SchemaNode(
+        colander.String(), validator=unique_or_unchanged_name,
+        description=_("Used for login"))
     fullname = colander.SchemaNode(colander.String())
     email = colander.SchemaNode(colander.String(), missing=None)
     password = colander.SchemaNode(
