@@ -2,12 +2,15 @@ from collections import deque
 
 from pyramid.decorator import reify
 from pyramid.i18n import TranslationStringFactory
+from pyramid.security import has_permission
 from pyramid_layout.layout import layout_config
 
 _ = TranslationStringFactory('gathr')
 
 
 from ..metadata import ResourceContainer
+from ..security import MANAGE
+from ..utils import find_users
 
 
 @layout_config(name='anonymous', template='templates/anonymous_layout.pt')
@@ -51,3 +54,14 @@ class MainLayout(AnonymousLayout):
                     'url': url(node)})
             node = node.__parent__
         return breadcrumbs
+
+    @reify
+    def main_menu(self):
+        items = []
+        users = find_users(self.context)
+        request = self.request
+        if has_permission(MANAGE, users, request):
+            items.append({
+                'title': _("Manage Users"),
+                'url': request.resource_url(users)})
+        return items

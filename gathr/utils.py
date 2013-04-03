@@ -2,6 +2,7 @@ import os
 import re
 
 from churro import PersistentProperty
+from pyramid.traversal import find_root
 
 
 _convert_to_dashes = re.compile(r"""[\s/:"']""") # ' damn you emacs
@@ -167,3 +168,6 @@ def make_readonly(field):
     for child in field.children:
         make_readonly(child)
 
+
+def find_users(context):
+    return find_root(context).get('users')
