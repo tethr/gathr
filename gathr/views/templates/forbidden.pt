@@ -1,4 +1,9 @@
 <html metal:use-macro="main_template" i18n:domain="gathr">
-    <div metal:fill-slot="content" i18n:translate=""
-        >You do not have permission to view this page.</div>
+    <div metal:fill-slot="content">
+        <p i18n:translate="" tal:condition="not at_root"
+            >You do not have permission to view this page.</p>
+        <p tal:repeat="home homes">
+            <a href="${home.url}">${home.title}</a>
+        </p>
+    </div>
 </html>

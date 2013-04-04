@@ -62,3 +62,21 @@ class User(Persistent):
     @property
     def title(self):
         return self.fullname
+
+    def find_home(self):
+        nodes = [group.split(':')[1] for group in self.groups]
+        if len(nodes) <= 1:
+            return nodes
+
+        nodes = [filter(None, node.split('/')) for node in nodes]
+        nodes.sort(key=lambda node: len(node))
+        roots = set()
+        for node in nodes:
+            for l in xrange(len(node) - 1):
+                if tuple(node[:l + 1]) in roots:
+                    break
+            else:
+                roots.add(tuple(node))
+
+        return ['/' + '/'.join(root) for root in roots]
+

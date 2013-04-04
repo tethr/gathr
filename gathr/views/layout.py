@@ -10,6 +10,7 @@ _ = TranslationStringFactory('gathr')
 
 from ..metadata import ResourceContainer
 from ..security import MANAGE
+from ..security import READ
 from ..utils import find_users
 
 
@@ -46,12 +47,14 @@ class MainLayout(AnonymousLayout):
     def breadcrumbs(self):
         breadcrumbs = deque()
         node = self.context
-        url = self.request.resource_url
+        request = self.request
+        url = request.resource_url
         while node is not None:
             if not isinstance(node, ResourceContainer):
                 breadcrumbs.appendleft({
                     'title': node.title,
-                    'url': url(node)})
+                    'url': url(node),
+                    'viewable': has_permission(READ, node, request)})
             node = node.__parent__
         return breadcrumbs
 
