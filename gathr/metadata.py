@@ -12,6 +12,8 @@ from deform_bootstrap.widget import DateTimeInputWidget
 from churro import Persistent
 from churro import PersistentDate
 from churro import PersistentDatetime
+from churro import PersistentDict
+from churro import PersistentList
 from churro import PersistentFolder
 from churro import PersistentProperty
 from churro import PersistentType
@@ -170,6 +172,8 @@ class ResourceType(PersistentType):
 
 
 class Resource(PersistentFolder):
+    members = PersistentProperty()
+
     @reify
     def __acl__(self):
         path = resource_path(self)
@@ -177,9 +181,18 @@ class Resource(PersistentFolder):
             (Allow, '%s:%s' % (name, path), group['permissions'])
             for name, group in GROUPS.items()]
 
-    def _group(self, name):
-        assert name in GROUPS
-        return '%s:%s' % (name, resource_path(self))
+    def _group(self, group):
+        assert group in GROUPS
+        return '%s:%s' % (group, resource_path(self))
+
+    def _add_member(self, group, userid):
+        group_members = self.members.get(group)
+        if group_members is None:
+            self.members[group] = group_members = PersistentList()
+        group_members.append(userid)
+
+    def _remove_member(self, group, userid):
+        self.members[group].remove(userid)
 
     def __init__(self):
         for T in self.singleton_types:
@@ -188,6 +201,7 @@ class Resource(PersistentFolder):
             self[T.__name__] = ResourceContainer(T)
         for F in self.addable_forms:
             self[F.__name__] = F()
+        self.members = PersistentDict()
 
 
 class ResourceContainer(PersistentFolder):

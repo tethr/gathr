@@ -46,6 +46,12 @@ class User(Persistent):
         group = context._group(group_name)
         if group not in self.groups:
             self.groups.append(group)
+            context._add_member(group_name, self.__name__)
+
+    def remove_from_group(self, context, group_name):
+        group = context._group(group_name)
+        self.groups.remove(group)
+        context._remove_member(group_name, self.__name__)
 
     def set_password(self, password):
         self.password = bcrypt.encode(password)

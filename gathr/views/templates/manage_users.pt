@@ -7,7 +7,7 @@
             <div class="navbar"><div class="navbar-inner">
                 <form class="navbar-form pull-left">
                     <input type="text" class="typeahead" placeholder="Find user..."
-                           i18n:attributes="placeholder"/></form>
+                           i18n:attributes="placeholder" autocomplete="off"/></form>
                 <p class="pull-right">
                     <a href="${add_user_url}" class="btn btn-primary" i18n:translate=""
                         >Add user</a></p>

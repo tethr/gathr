@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html metal:use-macro="main_template">
+  <metal:block fill-slot="page-content">
+    <!-- Body -->
+    <div class="container-fluid" i18n:domain="gathr">
+      <h1>${layout.page_title}</h1>
+
+      <h2 i18n:translate="">Members</h2>
+      <table class="table table-striped table-hover table-condensed">
+        <tbody>
+          <tr tal:condition="not local_members">
+            <td i18n:translate="">No members here</td>
+          </tr>
+          <tr tal:repeat="member local_members">
+            <td>${member.user}</td>
+            <td>
+              <form class="form-inline" method="POST">
+                <input type="hidden" name="action" value="change_membership"/>
+                <input type="hidden" name="userid" value="${member.userid}"/>
+                <input type="hidden" name="prev_group" value="${member.group}"/>
+                <select name="group" onchange="form.submit()">
+                  <tal:block repeat="group_name GROUPS">
+                    <option tal:define="group GROUPS[group_name]"
+                      value="${group_name}"
+                      tal:attributes="selected '' if member['group'] == group_name 
+                                      else None">${group.label}</option>
+                  </tal:block>
+                  <option value="REMOVE" i18n:translate="">Remove</option>
+                </select>
+              </form>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Add member form -->
+      <form class="form-inline" method="POST" tal:condition="users" 
+            id="add_member">
+        <input type="hidden" name="action" value="add_member"/>
+        <input type="hidden" name="userid"/>
+        <input type="text" name="user" placeholder="User's name" class="typeahead"
+               autocomplete="off" i18n:attributes="placeholder"/>
+        <select name="group">
+          <tal:block repeat="group_name GROUPS">
+            <option value="${group_name}">${GROUPS[group_name].label}</option>
+          </tal:block>
+        </select>
+        <button type="submit" class="btn btn-primary" i18n:translate="">Add member</button>
+      </form>
+
+      <h2 i18n:translate="">Members inherited from higher levels</h2>
+      <table class="table table-striped table-hover table-condensed">
+        <tbody>
+          <tr tal:condition="not inherited_members">
+            <td i18n:translate="">No inherited members.</td>
+          </tr>
+          <tr tal:repeat="member inherited_members">
+            <td>${member.user}</td>
+            <td>${member.group}</td>
+            <td><a href="${member.url}">${member.path}</a></td>
+          </tr>
+        </tbody>
+    </div>
+  </metal:block>
+  <script metal:fill-slot="tail-scripts">
+    var users_typeahead = [${','.join(['"%s"' % user['name'] for user in users])}];
+    var users_map = {${','.join(['"%s": "%s"' % (user['name'], user['userid']) for user in users])}};
+
+    function selected_user(selection) {
+        var userid = users_map[selection];
+        $("form#add_member input[name='userid']").val(userid);
+        return selection;
+    }
+
+    $(".typeahead").typeahead({
+        source: users_typeahead,
+        items: 20,
+        updater: selected_user
+    });
+  </script>
+</html>

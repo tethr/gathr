@@ -104,6 +104,8 @@ def add_user(context, request):
         except deform.ValidationFailure, form:
             pass
 
+    layout = request.layout_manager.layout
+    layout.page_title = _("Add new user")
     rendered = HTML(form.render())
     return {'form': rendered}
 
