@@ -16,6 +16,7 @@ from ..utils import find_users
 from .users import user_title
 
 _ = TranslationStringFactory('gathr')
+isinstance = isinstance  # For use by mock in unittests
 
 
 @view_config(context=Resource, permission=READ,

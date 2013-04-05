@@ -9,11 +9,11 @@ class ViewResourceTests(unittest.TestCase):
         from ...metadata import ResourceContainer
         class DummyChild0(object):
             pass
-        class DummyChild1(object):
+        class DummyChild1(DummyChild0):
             display = 'Idiot'
             plural = 'Idiots'
             next_id = 'user'
-        class DummyChild2(object):
+        class DummyChild2(DummyChild0):
             display = 'Moron'
             plural = 'Morons'
             next_id = 'serial'
@@ -31,32 +31,25 @@ class ViewResourceTests(unittest.TestCase):
 
         self.request = DummyRequest()
 
+        from gathr.metadata import Resource, Form
+        def mockinstance(obj, types):
+            assert types == (Resource, Form)
+            return isinstance(obj, DummyResource)
+
+        patcher = mock.patch('gathr.views.resource.isinstance', mockinstance)
+        self.addCleanup(patcher.stop)
+        patcher.start()
+
     def call_fut(self):
         from ..resource import view_resource
         return view_resource(self.context, self.request)
 
     def test_it(self):
-        self.assertEqual(self.call_fut(),
-            {'children': [{'title': 'Zero', 'url': 'http://example.com/DummyChild0/'}],
-             'title': 'Losers',
-             'types': [{'add_url': 'http://example.com/add?type=DummyChild1',
-                        'children': [{'title': 'A',
-                                      'url': 'http://example.com/DummyChild1/a/'},
-                                     {'title': 'B',
-                                      'url': 'http://example.com/DummyChild1/b/'}],
-                        'name': 'DummyChild1',
-                        'next_id': 'user',
-                        'plural': 'Idiots',
-                        'singular': 'Idiot'},
-                       {'add_url': 'http://example.com/add?type=DummyChild2',
-                        'children': [{'title': 'A',
-                                      'url': 'http://example.com/DummyChild2/a/'},
-                                     {'title': 'B',
-                                      'url': 'http://example.com/DummyChild2/b/'}],
-                        'name': 'DummyChild2',
-                        'next_id': 'serial',
-                        'plural': 'Morons',
-                        'singular': 'Moron'}]})
+        response = self.call_fut()
+        self.assertEqual(response['children'], [
+            {'title': 'Zero', 'url': 'http://example.com/DummyChild0/'}])
+        self.assertEqual(response['title'], 'Losers')
+        self.assertEqual(len(response['types']), 2)
 
 
 class AddResourceTests(unittest.TestCase):
