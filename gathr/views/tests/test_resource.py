@@ -30,6 +30,7 @@ class ViewResourceTests(unittest.TestCase):
         context['DummyChild0'] = DummyResource(title='Zero')
 
         self.request = DummyRequest()
+        self.request.layout_manager = mock.Mock()
 
         from gathr.metadata import Resource, Form
         def mockinstance(obj, types):
@@ -48,7 +49,6 @@ class ViewResourceTests(unittest.TestCase):
         response = self.call_fut()
         self.assertEqual(response['children'], [
             {'title': 'Zero', 'url': 'http://example.com/DummyChild0/'}])
-        self.assertEqual(response['title'], 'Losers')
         self.assertEqual(len(response['types']), 2)
 
 

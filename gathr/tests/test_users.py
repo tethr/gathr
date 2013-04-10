@@ -25,13 +25,16 @@ class TestUser(unittest.TestCase):
 
     def test_ctor(self):
         from pyramid.security import Allow
+        from pyramid.security import Deny
+        from gathr.security import DELETE
         from gathr.security import READ_WRITE
         fred = self.make_one()
         self.assertEqual(fred.fullname, 'Fred Flintstone')
         self.assertEqual(fred.email, 'fred@bedrock')
         self.assertEqual(fred.groups, [])
         self.assertEqual(fred.title, fred.fullname)
-        self.assertEqual(fred.__acl__, [(Allow, 'fred', READ_WRITE)])
+        self.assertEqual(fred.__acl__, [(Deny, 'fred', (DELETE,)),
+                                        (Allow, 'fred', READ_WRITE)])
 
     def test_password(self):
         fred = self.make_one()
@@ -77,3 +80,12 @@ class TestUser(unittest.TestCase):
         fred.groups.append('group2:/bar/baz')
         self.assertEqual(set(fred.find_home()), set(['/foo', '/bar']))
 
+    def test_delete(self):
+        from pyramid.testing import DummyResource
+        root = DummyResource()
+        root['fred'] = fred = self.make_one()
+        fred.groups.append('mockgroup:/foo')
+        root['foo'] = context = DummyResource(_remove_member=mock.Mock())
+        fred.delete()
+        context._remove_member.assert_called_once_with('mockgroup', 'fred')
+        self.assertNotIn('fred', root)

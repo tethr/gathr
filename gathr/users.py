@@ -42,7 +42,7 @@ class User(Persistent):
 
     @property
     def __acl__(self):
-        return [(Deny, self.__name__, DELETE),
+        return [(Deny, self.__name__, (DELETE,)),
                 (Allow, self.__name__, READ_WRITE)]
 
     def add_to_group(self, context, group_name):
