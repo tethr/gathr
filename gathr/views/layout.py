@@ -18,10 +18,14 @@ from ..utils import find_users
 class AnonymousLayout(object):
     brand = _('Gathr')
     page_title = _('Gathr')
+    actions = None
 
     def __init__(self, context, request):
         self.context = context
         self.request = request
+        title = getattr(context, 'title', None)
+        if title:
+            self.page_title = title
 
     def static(self, path):
         return self.request.static_url('gathr.views:static/' + path)

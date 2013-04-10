@@ -1,44 +1,21 @@
 <!DOCTYPE html>
 <html metal:use-macro="main_template">
     <metal:block fill-slot="page-content">
-        <!-- Body -->
-        <div class="container-fluid">
-            <div class="btn-group pull-right" tal:condition="actions">
-                <tal:block repeat="action actions">
-                    <a tal:condition="'children' in action"
-                       class="btn dropdown-toggle" data-toggle="dropdown"
-                       href="#">${action.title} <span class="caret"></span></a>
-                    <ul class="dropdown-menu" 
-                        tal:condition="'children' in action">
-                        <li tal:repeat="child action.children">
-                            <a href="${child.url}"
-                               tal:attributes="data-toggle child.datatoggle|None"
-                               >${child.title}</a>
-                        </li>
-                    </ul>
-                    <a tal:condition="'children' not in action"
-                        class="btn" href="${action.url}"
-                        tal:attributes="data-toggle action.datatoggle|None"
-                        >${action.title}</a>
-                </tal:block>
-            </div>
-            <h1>${title}</h1>
-           <tal:block repeat="child children">
-                <h2>
+       <tal:block repeat="child children">
+            <h2>
+                <a href="${child.url}">${child.title}</a>
+            </h2>
+        </tal:block>
+        <tal:block repeat="t types">
+            <h2>
+                ${t.plural}
+            </h2> 
+            <ul tal:condition="t.children">
+                <li tal:repeat="child t.children">
                     <a href="${child.url}">${child.title}</a>
-                </h2>
-            </tal:block>
-            <tal:block repeat="t types">
-                <h2>
-                    ${t.plural}
-                </h2> 
-                <ul tal:condition="t.children">
-                    <li tal:repeat="child t.children">
-                        <a href="${child.url}">${child.title}</a>
-                    </li>
-                </ul>
-            </tal:block>
-        </div>
+                </li>
+            </ul>
+        </tal:block>
 
         <!-- Add named resource popover -->
         <tal:x repeat="t types"><div class="modal hide fade" 

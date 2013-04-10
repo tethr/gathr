@@ -71,10 +71,10 @@ def view_resource(context, request):
                 for child in context.values()
                 if isinstance(child, (Resource, Form))]
 
-    return {'title': context.title,
-            'types': types,
-            'children': children,
-            'actions': actions}
+    layout = request.layout_manager.layout
+    layout.actions = actions
+    return {'types': types,
+            'children': children}
 
 
 @view_config(context=Resource, name='add', permission=WRITE, renderer='json')

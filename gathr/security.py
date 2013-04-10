@@ -6,10 +6,11 @@ _ = TranslationStringFactory('gathr')
 READ = 'read'
 WRITE = 'write'
 MANAGE = 'manage'
+DELETE = 'delete'
 
 READ_ONLY = [READ]
 READ_WRITE = [READ, WRITE]
-ALL_PERMISSIONS = [READ, WRITE, MANAGE]
+ALL_PERMISSIONS = [READ, WRITE, MANAGE, DELETE]
 
 READERS = 'readers'
 WRITERS = 'writers'

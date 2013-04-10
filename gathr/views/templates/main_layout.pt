@@ -46,11 +46,43 @@
             </li>
         </ul>
 
-        <metal:block define-slot="page-content"></metal:block>
+        <!-- Body -->
+        <div class="container-fluid">
+            <div class="btn-group pull-right" tal:condition="layout.actions">
+                <tal:block repeat="action layout.actions">
+                    <a tal:condition="'children' in action"
+                       class="btn dropdown-toggle" data-toggle="dropdown"
+                       href="#">${action.title} <span class="caret"></span></a>
+                    <ul class="dropdown-menu" 
+                        tal:condition="'children' in action">
+                        <li tal:repeat="child action.children">
+                            <a href="${child.url}"
+                               tal:attributes="data-toggle child.datatoggle|None"
+                               >${child.title}</a>
+                        </li>
+                    </ul>
+                    <a tal:condition="'children' not in action"
+                        tal:attributes="data-toggle action.datatoggle|None;
+                                        href action.url;
+                                        class action.get('class', 'btn');
+                                        confirm action.get('confirm')"
+                        >${action.title}</a>
+                </tal:block>
+            </div>
+            <header>
+                <h1>${layout.page_title}</h1>
+            </header>
+            <metal:block define-slot="page-content"></metal:block>
+        </div>
 
         <!-- Scripts -->
         <script src="${layout.static('js/lib/jquery-1.9.0.min.js')}"></script>
         <script src="${layout.static('js/lib/bootstrap.min.js')}"></script>
+        <script>
+            $("a[confirm]").bind('click', function() {
+                return confirm($(this).attr("confirm"));
+            });
+        </script>
         <metal:block define-slot="tail-scripts"></metal:block>
     </body>
 </html>

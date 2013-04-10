@@ -1,11 +1,7 @@
 <!DOCTYPE html>
 <html metal:use-macro="main_template">
     <metal:block fill-slot="page-content">
-        <!-- Body -->
-        <div class="container-fluid">
-            <h1>${layout.page_title}</h1>
-            ${form}
-       </div>
+        ${form}
     </metal:block>
     <metal:block fill-slot="tail-scripts">
         <script src="${layout.deform('bootstrap-datepicker.js')}"></script>

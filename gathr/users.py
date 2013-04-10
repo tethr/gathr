@@ -10,7 +10,9 @@ from pyramid.security import Allow
 from pyramid.security import ALL_PERMISSIONS
 from pyramid.security import Deny
 from pyramid.security import Everyone
+from pyramid.traversal import find_resource
 
+from .security import DELETE
 from .security import MANAGERS
 from .security import READ_WRITE
 
@@ -40,7 +42,8 @@ class User(Persistent):
 
     @property
     def __acl__(self):
-        return [(Allow, self.__name__, READ_WRITE)]
+        return [(Deny, self.__name__, DELETE),
+                (Allow, self.__name__, READ_WRITE)]
 
     def add_to_group(self, context, group_name):
         group = context._group(group_name)
@@ -79,4 +82,11 @@ class User(Persistent):
                 roots.add(tuple(node))
 
         return ['/' + '/'.join(root) for root in roots]
+
+    def delete(self):
+        for group in self.groups:
+            name, path = group.split(':')
+            resource = find_resource(self, path)
+            resource._remove_member(name, self.__name__)
+        del self.__parent__[self.__name__]
 

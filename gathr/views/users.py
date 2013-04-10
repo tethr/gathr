@@ -6,6 +6,7 @@ from pyramid.i18n import TranslationStringFactory
 from pyramid.security import has_permission
 from pyramid.view import view_config
 
+from ..security import DELETE
 from ..security import MANAGE
 from ..security import READ
 from ..security import WRITE
@@ -46,6 +47,16 @@ def view_user(context, request):
         if not editable:
             make_readonly(form)
         rendered = HTML(form.render(data))
+
+    if has_permission(DELETE, context, request):
+        layout = request.layout_manager.layout
+        layout.actions = [
+            {'title': _('Delete User'),
+             'url': request.resource_url(context, 'delete'),
+             'class': 'btn btn-danger',
+             'confirm': _("Are you sure you want to delete the user, ${name}?",
+                          mapping={'name': context.fullname})
+            }]
 
     return {'form': rendered}
 
@@ -127,3 +138,10 @@ class AddUserSchema(colander.Schema):
     email = colander.SchemaNode(colander.String(), missing=None)
     password = colander.SchemaNode(colander.String(),
         widget=deform.widget.CheckedPasswordWidget())
+
+
+@view_config(context=User, name='delete', permission=DELETE)
+def delete_user(context, request):
+    folder = context.__parent__
+    context.delete()
+    return HTTPFound(request.resource_url(folder))
