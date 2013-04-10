@@ -106,6 +106,13 @@ def manage_permissions(context, request):
         if group != 'REMOVE':
             assert group in GROUPS
             user.add_to_group(context, group)
+            transaction.get().note(
+                "Changed user's (%s) membership from %s to %s on %s" % (
+                    user.fullname, prev_group, group, resource_path(context)))
+        else:
+            transaction.get().note(
+                "Removed user's (%s) membership from %s" % (
+                    user.fullname, resource_path(context)))
         return HTTPFound(request.resource_url(context, request.view_name))
 
     elif action == 'add_member' and request.params.get('userid'):
@@ -113,6 +120,9 @@ def manage_permissions(context, request):
         group = request.params['group']
         user = users[userid]
         user.add_to_group(context, group)
+        transaction.get().note(
+            "Added user (%s) to %s on %s" % (
+                user.fullname, group, resource_path(context)))
         return HTTPFound(request.resource_url(context, request.view_name))
 
     local_members = []

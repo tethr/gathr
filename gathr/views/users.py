@@ -1,5 +1,6 @@
 import colander
 import deform
+import transaction
 
 from pyramid.httpexceptions import HTTPFound
 from pyramid.i18n import TranslationStringFactory
@@ -27,10 +28,12 @@ def view_user(context, request):
     form = deform.Form(schema, buttons=(_('Save changes'),))
     if editable and request.method == 'POST':
         try:
+            note = 'Edited user: %s.' % context.fullname
             data = form.validate(request.params.items())
             context.fullname = data.get('fullname', context.fullname)
             context.email = data.get('email', context.email)
             if data['password']:
+                note += '  Changed password.'
                 context.set_password(data['password'])
             if data['userid'] != context.__name__:
                 folder = context.__parent__
@@ -38,6 +41,7 @@ def view_user(context, request):
                 folder[data['userid']] = context
             redirect_to = request.session.pop(
                 'came_from', request.application_url)
+            transaction.get().note(note)
             return HTTPFound(redirect_to)
         except deform.ValidationFailure, form:
             rendered = HTML(form.render())
@@ -111,6 +115,7 @@ def add_user(context, request):
             user = User(data['fullname'], data['email'])
             user.set_password(data['password'])
             context[data['userid']] = user
+            transaction.get().note('Added new user: %s.' % user.fullname)
             return HTTPFound(request.resource_url(context))
         except deform.ValidationFailure, form:
             pass
@@ -142,6 +147,7 @@ class AddUserSchema(colander.Schema):
 
 @view_config(context=User, name='delete', permission=DELETE)
 def delete_user(context, request):
+    transaction.get().note('Deleted user: %s' % context.fullname)
     folder = context.__parent__
     context.delete()
     return HTTPFound(request.resource_url(folder))
