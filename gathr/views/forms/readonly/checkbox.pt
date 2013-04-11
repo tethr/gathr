@@ -1,3 +1,4 @@
+<tal:block>
 <input tal:define="name name|field.name;
                    true_val true_val|field.widget.true_val;
                    css_class css_class|field.widget.css_class;
@@ -11,3 +12,4 @@
 <label tal:condition="hasattr(field, 'schema') and hasattr(field.schema, 'label')"
        for="${field.oid}"
        tal:content="field.schema.label" class="checkbox-label" />
+</tal:block>

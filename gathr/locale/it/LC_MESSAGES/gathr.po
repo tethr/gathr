@@ -1,0 +1,187 @@
+# Italian translations for gathr.
+# Copyright (C) 2013 ORGANIZATION
+# This file is distributed under the same license as the gathr project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2013.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: gathr 0.1dev\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2013-04-11 19:15-0400\n"
+"PO-Revision-Date: 2013-04-11 13:58-0400\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: it <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 0.9.6\n"
+
+#: gathr/metadata.py:424
+msgid "Choose one"
+msgstr "Scegli"
+
+#: gathr/security.py:20
+msgid "Read only"
+msgstr "Solo guardare"
+
+#: gathr/security.py:21
+msgid "Read and write"
+msgstr "Leggere e scrivere"
+
+#: gathr/security.py:22
+msgid "Manage"
+msgstr "Gestire"
+
+#: gathr/users.py:25
+msgid "Users"
+msgstr "Utenti"
+
+#: gathr/views/forbidden.py:15
+msgid "Login required"
+msgstr "Login necessario"
+
+#: gathr/views/forbidden.py:31
+msgid "Welcome to Gathr"
+msgstr "Benvenuti a Gathr"
+
+#: gathr/views/forbidden.py:33
+msgid "Forbidden"
+msgstr "Vietato"
+
+#: gathr/views/layout.py:22 gathr/views/layout.py:23
+msgid "Gathr"
+msgstr "Raccogliere"
+
+#: gathr/views/layout.py:26 gathr/views/templates/manage_users.pt:6
+msgid "Find user..."
+msgstr "Trovare Utente"
+
+#: gathr/views/layout.py:53
+msgid "logout"
+msgstr "uscire"
+
+#: gathr/views/layout.py:78 gathr/views/users.py:97
+msgid "Manage Users"
+msgstr "Gestire Utenti"
+
+#: gathr/views/login.py:31
+msgid "Invalid username or password"
+msgstr "Nome di utente o passaparola non valido"
+
+#: gathr/views/login.py:39
+msgid "Login"
+msgstr "Autenticare"
+
+#: gathr/views/login.py:53
+msgid "Gathr Login"
+msgstr "Gathr Autenticazione"
+
+#: gathr/views/resource.py:30
+msgid "Manage Permissions"
+msgstr "Gestire Diritti"
+
+#: gathr/views/resource.py:61
+msgid "Add ${something}"
+msgstr "Aggiungere ${something}"
+
+#: gathr/views/resource.py:67
+msgid "Add"
+msgstr "Aggiungere"
+
+#: gathr/views/resource.py:161
+msgid "Manage permissions: ${title}"
+msgstr "Gestire Diritti: ${title}"
+
+#: gathr/views/users.py:28
+msgid "Save changes"
+msgstr "Registrare cambiamenti"
+
+#: gathr/views/users.py:58
+msgid "Delete User"
+msgstr "Rimuovere Utente"
+
+#: gathr/views/users.py:61
+msgid "Are you sure you want to delete the user, ${name}?"
+msgstr "Certo di rimuovere questo utente, ${name}?"
+
+#: gathr/views/users.py:74 gathr/views/users.py:135
+msgid "A user with that id already exists."
+msgstr "C'è già un utente con dato identificazione."
+
+#: gathr/views/users.py:81
+msgid "Used for login"
+msgstr "Per accesso al sistema."
+
+#: gathr/views/users.py:85
+msgid "Change password"
+msgstr "Cambiare Passaparola"
+
+#: gathr/views/users.py:111 gathr/views/templates/manage_users.pt:10
+msgid "Add user"
+msgstr "Aggiungere Utente"
+
+#: gathr/views/users.py:124
+msgid "Add new user"
+msgstr "Aggiungere nuovo utente"
+
+#: gathr/views/users.py:141
+msgid "Name user will use to log in"
+msgstr "Nome usato dall'utente per accedere al sistema."
+
+#: gathr/views/forms/readonly/dateparts.pt:4
+msgid "Year"
+msgstr "Anno"
+
+#: gathr/views/forms/readonly/dateparts.pt:11
+msgid "Month"
+msgstr "Mese"
+
+#: gathr/views/forms/readonly/dateparts.pt:18
+msgid "Day"
+msgstr "Giorno"
+
+#: gathr/views/forms/readonly/splitted_datetimeinput.pt:4
+msgid "Date"
+msgstr "Dato"
+
+#: gathr/views/forms/readonly/splitted_datetimeinput.pt:10
+msgid "Time"
+msgstr "Tempo"
+
+#: gathr/views/templates/forbidden.pt:3
+msgid "You do not have permission to view this page."
+msgstr "Non hai permesso di vedere questa pagine."
+
+#: gathr/views/templates/main_layout.pt:36
+msgid "You are logged in as ${name}"
+msgstr "Tu sei ${name}"
+
+#: gathr/views/templates/manage_permissions.pt:4
+msgid "Members"
+msgstr "Membri"
+
+#: gathr/views/templates/manage_permissions.pt:8
+msgid "No members here"
+msgstr "Nessuno membro"
+
+#: gathr/views/templates/manage_permissions.pt:24
+msgid "Remove"
+msgstr "Rimuovere"
+
+#: gathr/views/templates/manage_permissions.pt:37
+msgid "User's name"
+msgstr "Nome di utente"
+
+#: gathr/views/templates/manage_permissions.pt:44
+msgid "Add member"
+msgstr "Aggiungere membro"
+
+#: gathr/views/templates/manage_permissions.pt:49
+msgid "Members inherited from higher levels"
+msgstr "Membri eriditati dai livelli più alti"
+
+#: gathr/views/templates/manage_permissions.pt:53
+msgid "No inherited members."
+msgstr "Nessuni membri eriditati."
+

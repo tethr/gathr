@@ -6,9 +6,11 @@ import sys
 VERSION = '0.1dev'
 
 requires = [
+    'Babel',
     'churro',
     'cryptacular',
     'deform_bootstrap',
+    'lingua',
     'pyramid',
     'pyramid_layout',
     'pyramid_tm',
@@ -60,6 +62,10 @@ setup(name='gathr',
           'docs': doc_extras,
       },
       test_suite="gathr.tests",
+      message_extractors = { 'gathr': [
+                   ('**.py',   'lingua_python', None ),
+                   ('**.pt',   'lingua_xml', None ),
+                   ]},
       entry_points="""\
       [paste.app_factory]
       main = gathr.application:main

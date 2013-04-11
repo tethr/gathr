@@ -16,7 +16,11 @@ def main(global_config, **config):
     settings = global_config.copy()
     settings.update(config)
 
-    config = Configurator(settings=settings, root_factory=root_factory)
+    config = Configurator(
+        settings=settings,
+        root_factory=root_factory,
+        locale_negotiator=locale_negotiator,
+    )
     metadata = Metadata(settings['metadata'])
     config.set_authentication_policy(
         AuthTktAuthenticationPolicy(settings['secret'], find_user))
@@ -28,6 +32,7 @@ def main(global_config, **config):
     config.add_static_view('/static', 'gathr.views:static')
     config.set_session_factory(
         UnencryptedCookieSessionFactoryConfig(settings['secret']))
+    config.add_translation_dirs("gathr:locale")
     config.scan()
     add_deform_search_path()
     return config.make_wsgi_app()
@@ -73,3 +78,28 @@ def add_deform_search_path():
     # OMG monkey patch!  Consider fixing readonly forms upstream.
     from deform_bootstrap.widget import DateTimeInputWidget as widget
     widget.readonly_template = 'readonly/splitted_datetimeinput'
+
+
+DEFAULT_LOCALE = 'en'
+AVAILABLE_LOCALES = set(['en', 'it'])
+LOCALE_COOKIE = '_LOCALE_'
+
+def locale_negotiator(request):
+    # Give user chance to change language
+    locale = request.params.get(LOCALE_COOKIE)
+    if locale:
+       request.response.set_cookie(LOCALE_COOKIE, locale)
+       return locale
+
+    # Prefer cookie, fall back on Accept-Language header.
+    locale = request.cookies.get(LOCALE_COOKIE)
+    if locale:
+        return locale
+
+    if request.accept_language:
+        for locale in request.accept_language:
+            if locale in AVAILABLE_LOCALES:
+                request.response.set_cookie(LOCALE_COOKIE, locale)
+                return locale
+
+    return DEFAULT_LOCALE

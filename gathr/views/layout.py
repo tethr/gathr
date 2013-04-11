@@ -1,6 +1,8 @@
+from babel import Locale
 from collections import deque
 
 from pyramid.decorator import reify
+from pyramid.i18n import get_locale_name
 from pyramid.i18n import TranslationStringFactory
 from pyramid.security import has_permission
 from pyramid_layout.layout import layout_config
@@ -8,6 +10,7 @@ from pyramid_layout.layout import layout_config
 _ = TranslationStringFactory('gathr')
 
 
+from ..application import AVAILABLE_LOCALES
 from ..metadata import ResourceContainer
 from ..security import MANAGE
 from ..security import READ
@@ -72,3 +75,16 @@ class MainLayout(AnonymousLayout):
                 'title': _("Manage Users"),
                 'url': request.resource_url(users)})
         return items
+
+    @reify
+    def locales(self):
+        locales = []
+        current = get_locale_name(self.request)
+        for name in sorted(AVAILABLE_LOCALES):
+            locale = Locale(name)
+            locales.append({
+                'name': name,
+                'display': locale.display_name.title(),
+                'current': name == current,
+            })
+        return locales

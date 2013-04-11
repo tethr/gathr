@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html metal:use-macro="main_template">
-    <metal:block fill-slot="page-content">
+    <metal:block fill-slot="page-content" i18n:domain="gathr">
         <div class="navbar"><div class="navbar-inner">
             <form class="navbar-form pull-left">
-                <input type="text" class="typeahead" placeholder="Find user..."
-                       i18n:attributes="placeholder" autocomplete="off"/></form>
+                <input type="text" class="typeahead" autocomplete="off"
+                       i18n:attributes="placeholder"
+                       placeholder="Find user..."/></form>
             <p class="pull-right">
                 <a href="${add_user_url}" class="btn btn-primary" i18n:translate=""
                     >Add user</a></p>

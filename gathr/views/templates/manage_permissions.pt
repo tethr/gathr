@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html metal:use-macro="main_template">
-  <metal:block fill-slot="page-content">
+  <metal:block fill-slot="page-content" i18n:domain="gathr">
       <h2 i18n:translate="">Members</h2>
       <table class="table table-striped table-hover table-condensed">
         <tbody>

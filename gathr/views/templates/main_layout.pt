@@ -2,7 +2,7 @@
 <html lang="en" i18n:domain="gathr">
     <head>
         <title>${layout.page_title}</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
         <link rel="stylesheet" type="text/css" media="screen"
               href="${layout.static('css/bootstrap.min.css')}"/>
         <link rel="stylesheet" type="text/css" media="screen"
@@ -22,6 +22,15 @@
                         <a href="${item['url']}">${item['title']}</a>
                     </li>
                 </ul>
+                <form id="locale" class="navbar-form pull-right">
+                    <select name="_LOCALE_" onChange="this.form.submit()">
+                        <option tal:repeat="l layout.locales" 
+                            tal:attributes="
+                                value l.name;
+                                selected '' if l.current else None"
+                            >${l.display}</option>
+                    </select>
+                </form>
                 <ul class="nav pull-right">
                     <li>
                     <p class="navbar-text" i18n:translate="">

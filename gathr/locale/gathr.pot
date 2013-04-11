@@ -1,0 +1,187 @@
+# Translations template for gathr.
+# Copyright (C) 2013 ORGANIZATION
+# This file is distributed under the same license as the gathr project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2013.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: gathr 0.1dev\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2013-04-11 19:15-0400\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 0.9.6\n"
+
+#: gathr/metadata.py:424
+msgid "Choose one"
+msgstr ""
+
+#: gathr/security.py:20
+msgid "Read only"
+msgstr ""
+
+#: gathr/security.py:21
+msgid "Read and write"
+msgstr ""
+
+#: gathr/security.py:22
+msgid "Manage"
+msgstr ""
+
+#: gathr/users.py:25
+msgid "Users"
+msgstr ""
+
+#: gathr/views/forbidden.py:15
+msgid "Login required"
+msgstr ""
+
+#: gathr/views/forbidden.py:31
+msgid "Welcome to Gathr"
+msgstr ""
+
+#: gathr/views/forbidden.py:33
+msgid "Forbidden"
+msgstr ""
+
+#: gathr/views/layout.py:22 gathr/views/layout.py:23
+msgid "Gathr"
+msgstr ""
+
+#: gathr/views/layout.py:26 gathr/views/templates/manage_users.pt:6
+msgid "Find user..."
+msgstr ""
+
+#: gathr/views/layout.py:53
+msgid "logout"
+msgstr ""
+
+#: gathr/views/layout.py:78 gathr/views/users.py:97
+msgid "Manage Users"
+msgstr ""
+
+#: gathr/views/login.py:31
+msgid "Invalid username or password"
+msgstr ""
+
+#: gathr/views/login.py:39
+msgid "Login"
+msgstr ""
+
+#: gathr/views/login.py:53
+msgid "Gathr Login"
+msgstr ""
+
+#: gathr/views/resource.py:30
+msgid "Manage Permissions"
+msgstr ""
+
+#: gathr/views/resource.py:61
+msgid "Add ${something}"
+msgstr ""
+
+#: gathr/views/resource.py:67
+msgid "Add"
+msgstr ""
+
+#: gathr/views/resource.py:161
+msgid "Manage permissions: ${title}"
+msgstr ""
+
+#: gathr/views/users.py:28
+msgid "Save changes"
+msgstr ""
+
+#: gathr/views/users.py:58
+msgid "Delete User"
+msgstr ""
+
+#: gathr/views/users.py:61
+msgid "Are you sure you want to delete the user, ${name}?"
+msgstr ""
+
+#: gathr/views/users.py:74 gathr/views/users.py:135
+msgid "A user with that id already exists."
+msgstr ""
+
+#: gathr/views/users.py:81
+msgid "Used for login"
+msgstr ""
+
+#: gathr/views/users.py:85
+msgid "Change password"
+msgstr ""
+
+#: gathr/views/users.py:111 gathr/views/templates/manage_users.pt:10
+msgid "Add user"
+msgstr ""
+
+#: gathr/views/users.py:124
+msgid "Add new user"
+msgstr ""
+
+#: gathr/views/users.py:141
+msgid "Name user will use to log in"
+msgstr ""
+
+#: gathr/views/forms/readonly/dateparts.pt:4
+msgid "Year"
+msgstr ""
+
+#: gathr/views/forms/readonly/dateparts.pt:11
+msgid "Month"
+msgstr ""
+
+#: gathr/views/forms/readonly/dateparts.pt:18
+msgid "Day"
+msgstr ""
+
+#: gathr/views/forms/readonly/splitted_datetimeinput.pt:4
+msgid "Date"
+msgstr ""
+
+#: gathr/views/forms/readonly/splitted_datetimeinput.pt:10
+msgid "Time"
+msgstr ""
+
+#: gathr/views/templates/forbidden.pt:3
+msgid "You do not have permission to view this page."
+msgstr ""
+
+#: gathr/views/templates/main_layout.pt:36
+msgid "You are logged in as ${name}"
+msgstr ""
+
+#: gathr/views/templates/manage_permissions.pt:4
+msgid "Members"
+msgstr ""
+
+#: gathr/views/templates/manage_permissions.pt:8
+msgid "No members here"
+msgstr ""
+
+#: gathr/views/templates/manage_permissions.pt:24
+msgid "Remove"
+msgstr ""
+
+#: gathr/views/templates/manage_permissions.pt:37
+msgid "User's name"
+msgstr ""
+
+#: gathr/views/templates/manage_permissions.pt:44
+msgid "Add member"
+msgstr ""
+
+#: gathr/views/templates/manage_permissions.pt:49
+msgid "Members inherited from higher levels"
+msgstr ""
+
+#: gathr/views/templates/manage_permissions.pt:53
+msgid "No inherited members."
+msgstr ""
+
