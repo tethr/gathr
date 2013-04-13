@@ -20,9 +20,11 @@ from churro import PersistentType
 
 from pyramid.decorator import reify
 from pyramid.httpexceptions import HTTPConflict
+from pyramid.i18n import TranslationString
 from pyramid.i18n import TranslationStringFactory
 from pyramid.path import DottedNameResolver
 from pyramid.security import Allow
+from pyramid.threadlocal import get_current_registry
 from pyramid.traversal import resource_path
 
 from .security import GROUPS
@@ -42,7 +44,10 @@ class Metadata(object):
         self.datastreams = {}
         self.classes = {}
         self.dynamic_package = dynamic_package
+        self.messages = []
         yaml_data = yaml.load(open(os.path.join(folder, filename)))
+        self.i18n_domain = yaml_data.pop('i18n_domain', 'gathr_metadata')
+        self.i18n_message = MessageFactory(self.i18n_domain, self.messages)
         self.load_datastreams(yaml_data.pop('datastreams', None))
         self.load_resources(yaml_data.pop('resources'))
         assert not yaml_data, "Unknown nodes in metadata: %s" % yaml_data
@@ -127,17 +132,21 @@ class ResourceType(PersistentType):
             '__metadata__': metadata,
         }
 
+        i18n = metadata.i18n_message
         if 'display' in node:
-            members['display'] = node.pop('display')
+            members['display'] = i18n(node.pop('display'))
         else:
-            members['display'] = name
-        members['plural'] = node.pop('plural', members['display'] + 's')
+            members['display'] = i18n(name)
+        members['plural'] = i18n(node.pop('plural', members['display'] + 's'))
         name = make_name(types, name.title().replace(' ', ''))
 
         if members['next_id'] == 'serial':
+            i18n_id = "serial_id_%s" % name
+            i18n(i18n_id, default="%s ${number}" % members['display'])
             def title(self):
-                # Will need to use or return TranslationString for i18n
-                return '%s %s' % (self.display, self.__name__)
+                return TranslationString(
+                    i18n_id, default="%s ${number}" % self.display,
+                    mapping={'number': self.__name__})
             members['title'] = property(title)
             def create_serial(cls, folder, request):
                 name = str(len(folder) + 1)
@@ -222,10 +231,11 @@ class FormType(PersistentType):
             'datastream': datastream,
             '__metadata__': metadata,
         }
+        i18n = metadata.i18n_message
         if 'display' in node:
-            members['title'] = node.pop('display')
+            members['title'] = i18n(node.pop('display'))
         else:
-            members['title'] = name
+            members['title'] = i18n(name)
         name = make_name(types, name.title().replace(' ', ''))
 
         datastream = metadata.datastreams[datastream]
@@ -279,7 +289,7 @@ class Datastream(object):
     def __init__(self, metadata, name, fields):
         self.__metadata__ = metadata
         self.name = name
-        self.fields = [Field.load(node) for node in fields]
+        self.fields = [Field.load(metadata, node) for node in fields]
 
     def record(self, fs, form):
         if not fs.exists('/datastreams'):
@@ -322,13 +332,14 @@ class Field(object):
     required = True
 
     @classmethod
-    def load(cls, node):
+    def load(cls, metadata, node):
         type = node.pop('type')
-        return cls.types[type](node)
+        return cls.types[type](metadata, node)
 
-    def __init__(self, node):
+    def __init__(self, metadata, node):
+        i18n = metadata.i18n_message
         self.name = node.pop('name')
-        self.title = node.pop('display', self.name)
+        self.title = i18n(node.pop('display', self.name))
         self.required = node.pop('required', self.required)
 
         assert not node, "Unknown field attributes: %s" % node
@@ -369,11 +380,14 @@ class IntegerField(Field, PersistentProperty):
 class FloatField(Field, PersistentProperty):
     schema_type = colander.Float
 
-    def __init__(self, node):
-        self.units = node.pop('units', None)
-        super(FloatField, self).__init__(node)
+    def __init__(self, metadata, node):
+        units = node.pop('units', None)
+        super(FloatField, self).__init__(metadata, node)
 
-        if not self.units:
+        if units:
+            self.units = metadata.i18n_message(
+                'unit_of_measure_%s' % units, default=units)
+        else:
             self.widget = None
 
     def widget(self):
@@ -410,16 +424,21 @@ class ChooseOneField(Field, PersistentProperty):
     schema_type = colander.String
     break_point = 4
 
-    def __init__(self, node):
-        self.choices = node.pop('choices')
-        super(ChooseOneField, self).__init__(node)
+    def __init__(self, metadata, node):
+        choices = node.pop('choices')
+        super(ChooseOneField, self).__init__(metadata, node)
+
+        i18n = metadata.i18n_message
+        self.choices = [
+            (choice, i18n("%s_%s" % (self.name, choice), default=choice))
+            for choice in choices]
 
     def widget(self):
-        choices = [
-            (choice, choice) for choice in self.choices]
-        if len(self.choices) <= self.break_point:
+        choices = self.choices
+        if len(choices) <= self.break_point:
             widget = deform.widget.RadioChoiceWidget
         else:
+            choices = list(self.choices) # copy before mutate
             widget = deform.widget.SelectWidget
             choices.insert(0, ('', _('Choose one')))
         return widget(values=choices)
@@ -431,15 +450,30 @@ class ChooseManyField(Field, PersistentSetProperty):
     break_point = 4
     required = False
 
-    def __init__(self, node):
-        self.choices = node.pop('choices')
-        super(ChooseManyField, self).__init__(node)
+    def __init__(self, metadata, node):
+        choices = node.pop('choices')
+        super(ChooseManyField, self).__init__(metadata, node)
+
+        i18n = metadata.i18n_message
+        self.choices = [
+            (choice, i18n("%s_%s" % (self.name, choice), default=choice))
+            for choice in choices]
 
     def widget(self):
-        choices = [
-            (choice, choice) for choice in self.choices]
-        return deform.widget.CheckboxChoiceWidget(values=choices)
+        return deform.widget.CheckboxChoiceWidget(values=self.choices)
 
     def to_csv(self, value):
         if value:
             return '|'.join(value)
+
+
+class MessageFactory(object):
+
+    def __init__(self, domain, messages):
+        self.factory = TranslationStringFactory(domain)
+        self.messages = messages
+
+    def __call__(self, *args, **kw):
+        message = self.factory(*args, **kw)
+        self.messages.append(message)
+        return message
