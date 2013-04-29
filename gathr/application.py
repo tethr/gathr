@@ -7,7 +7,10 @@ from churro import Churro
 from pyramid.authentication import AuthTktAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid.config import Configurator
+from pyramid.i18n import get_localizer
 from pyramid.session import UnencryptedCookieSessionFactoryConfig
+from pyramid.threadlocal import get_current_request
+
 
 from .metadata import Metadata
 from .users import UsersFolder
@@ -35,12 +38,12 @@ def main(global_config, **config):
         UnencryptedCookieSessionFactoryConfig(settings['secret']))
     metadata_folder = os.path.dirname(os.path.abspath(settings['metadata']))
     translation_folder = os.path.join(metadata_folder, 'locale')
-    translation_dirs = ["gathr:locale"]
+    translation_dirs = ["gathr:locale", "deform:locale"]
     if os.path.exists(translation_folder):
         translation_dirs.append(translation_folder)
     config.add_translation_dirs(*translation_dirs)
     config.scan()
-    add_deform_search_path()
+    config_deform()
     return config.make_wsgi_app()
 
 
@@ -70,16 +73,15 @@ def find_user(userid, request):
         return user.groups
 
 
-def add_deform_search_path():
-    """
-    We do read only forms differently than standard deform, so we need to get
-    our own widget templates on the search path.  This should be called after
-    deform_bootstrap has been included in the config.
-    """
-    loader = deform.Form.default_renderer.loader
-    loader.search_path = (
-        pkg_resources.resource_filename('gathr.views', 'forms'),
-        ) + loader.search_path
+def config_deform():
+    def translator(term):
+        return get_localizer(get_current_request()).translate(term)
+
+    default_path = deform.Form.default_renderer.loader.search_path
+    gathr_path = (pkg_resources.resource_filename('gathr.views', 'forms'),)
+    search_path = gathr_path + default_path
+    zpt_renderer = deform.ZPTRendererFactory(search_path, translator=translator)
+    deform.Form.set_default_renderer(zpt_renderer)
 
     # OMG monkey patch!  Consider fixing readonly forms upstream.
     from deform_bootstrap.widget import DateTimeInputWidget as widget

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gathr 0.1dev\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2013-04-29 14:45-0400\n"
+"POT-Creation-Date: 2013-04-29 15:50-0400\n"
 "PO-Revision-Date: 2013-04-11 13:58-0400\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: it <LL@li.org>\n"
@@ -49,6 +49,10 @@ msgstr "Benvenuti a Gathr"
 msgid "Forbidden"
 msgstr "Vietato"
 
+#: gathr/views/form.py:21 gathr/views/users.py:28
+msgid "Save changes"
+msgstr "Registrare cambiamenti"
+
 #: gathr/views/layout.py:22 gathr/views/layout.py:23
 msgid "Gathr"
 msgstr "Raccogliere"
@@ -77,15 +81,15 @@ msgstr "Gathr Autenticazione"
 msgid "Manage Permissions"
 msgstr "Gestire Diritti"
 
-#: gathr/views/resource.py:58 gathr/views/resource.py:69
+#: gathr/views/resource.py:51 gathr/views/resource.py:69
 msgid "Add ${something}"
 msgstr "Aggiungere ${something}"
 
-#: gathr/views/resource.py:59
+#: gathr/views/resource.py:52
 msgid "Create ${something}"
 msgstr "Creare ${something}"
 
-#: gathr/views/resource.py:60
+#: gathr/views/resource.py:53
 msgid "${something} ID"
 msgstr "${something} id"
 
@@ -96,10 +100,6 @@ msgstr "Aggiungere"
 #: gathr/views/resource.py:169
 msgid "Manage permissions: ${title}"
 msgstr "Gestire Diritti: ${title}"
-
-#: gathr/views/users.py:28
-msgid "Save changes"
-msgstr "Registrare cambiamenti"
 
 #: gathr/views/users.py:58
 msgid "Delete User"

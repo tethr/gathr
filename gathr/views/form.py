@@ -2,6 +2,7 @@ import deform
 import transaction
 
 from pyramid.httpexceptions import HTTPFound
+from pyramid.i18n import TranslationStringFactory
 from pyramid.security import has_permission
 from pyramid.traversal import resource_path
 from pyramid.view import view_config
@@ -12,10 +13,12 @@ from ..security import WRITE
 from ..utils import HTML
 from ..utils import make_readonly
 
+_ = TranslationStringFactory('gathr')
+
 
 @view_config(context=Form, renderer='templates/form.pt', permission=READ)
 def form(context, request):
-    form = deform.Form(context.schema(), buttons=('Save changes',))
+    form = deform.Form(context.schema(), buttons=(_('Save changes'),))
     editable = has_permission(WRITE, context, request)
     if editable and request.method == 'POST':
         try:
