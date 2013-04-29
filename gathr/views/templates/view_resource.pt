@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html metal:use-macro="main_template">
-    <metal:block fill-slot="page-content">
+    <metal:block fill-slot="page-content" i18n:domain="gathr">
        <tal:block repeat="child children">
             <h2>
                 <a href="${child.url}">${child.title}</a>
@@ -23,23 +23,23 @@
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" 
                         aria-hidden="true">&times;</button>
-                <h3>Add ${t.singular}</h3>
+                <h3>${t.dialog_title}</h3>
             </div>
             <form action="${t.add_url}" method="POST">
                 <div class="modal-body">
                     <div class="control-group">
                         <fieldset>
-                            <input type="text" placeholder="${t.singular} ID"
-                                   name="title"/>
+                            <input type="text" name="title"
+                                   placeholder="${t.dialog_placeholder}"/>
                             <span class="help-inline"></span>
                         </fieldset>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <a href="#" class="btn" data-dismiss="modal" 
-                       aria-hidden="true">Close</a>
+                       aria-hidden="true" i18n:translate="">Close</a>
                     <button type="submit" 
-                        class="btn btn-primary">Create ${t.singular}</button>
+                        class="btn btn-primary">${t.dialog_button}</button>
                 </div>
             </form>
         </div></tal:x>

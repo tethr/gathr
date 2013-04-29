@@ -26,18 +26,21 @@ def view_resource(context, request):
     types = []
     actions = []
     add_types = []
+    localizer = get_localizer(request)
     if has_permission(MANAGE, context, request):
         actions.append(
             {'title': _("Manage Permissions"),
              'url': request.resource_url(context, 'manage_permissions')})
 
     for resource_type in context.addable_types:
+        title = localizer.translate(resource_type.display)
         type_children = [
             {'title': child.title, 'url': request.resource_url(child)}
             for child in context[resource_type.__name__].values()]
         type_children.sort(key=lambda child: child['title'])
         add_url = request.resource_url(context, 'add', query={
             'type': resource_type.__name__})
+        mapping = {'something': title}
         types.append({
             'add_url': add_url,
             'name': resource_type.__name__,
@@ -45,24 +48,26 @@ def view_resource(context, request):
             'plural': resource_type.plural,
             'next_id': resource_type.next_id,
             'children': type_children,
+            'dialog_title': _("Add ${something}", mapping=mapping),
+            'dialog_button': _("Create ${something}", mapping=mapping),
+            'dialog_placeholder': _("${something} ID", mapping=mapping),
         })
         if has_permission(WRITE, context, request):
             if resource_type.next_id == 'user':
                 add_types.append({
-                    'title': resource_type.display,
+                    'title': title,
                     'url': '#add-%s-modal' % resource_type.__name__,
-                    'datatoggle': 'modal'})
+                    'datatoggle': 'modal',
+                })
             else:
                 add_types.append({
-                    'title': resource_type.display,
+                    'title': title,
                     'url': add_url})
 
     if add_types:
         if len(add_types) == 1:
-            localizer = get_localizer(request)
-            something = localizer.translate(add_types[0]['title'])
             add_types[0]['title'] = _(
-                "Add ${something}", mapping={'something': something}
+                "Add ${something}", mapping={'something': add_types[0]['title']}
             )
             actions.append(add_types[0])
         else:

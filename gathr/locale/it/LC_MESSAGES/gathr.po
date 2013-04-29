@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gathr 0.1dev\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2013-04-11 19:15-0400\n"
+"POT-Creation-Date: 2013-04-29 14:45-0400\n"
 "PO-Revision-Date: 2013-04-11 13:58-0400\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: it <LL@li.org>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 0.9.6\n"
 
-#: gathr/metadata.py:424
+#: gathr/metadata.py:441
 msgid "Choose one"
 msgstr "Scegli"
 
@@ -53,15 +53,11 @@ msgstr "Vietato"
 msgid "Gathr"
 msgstr "Raccogliere"
 
-#: gathr/views/layout.py:26 gathr/views/templates/manage_users.pt:6
-msgid "Find user..."
-msgstr "Trovare Utente"
-
-#: gathr/views/layout.py:53
+#: gathr/views/layout.py:50
 msgid "logout"
 msgstr "uscire"
 
-#: gathr/views/layout.py:78 gathr/views/users.py:97
+#: gathr/views/layout.py:75 gathr/views/users.py:97
 msgid "Manage Users"
 msgstr "Gestire Utenti"
 
@@ -77,19 +73,27 @@ msgstr "Autenticare"
 msgid "Gathr Login"
 msgstr "Gathr Autenticazione"
 
-#: gathr/views/resource.py:30
+#: gathr/views/resource.py:32
 msgid "Manage Permissions"
 msgstr "Gestire Diritti"
 
-#: gathr/views/resource.py:61
+#: gathr/views/resource.py:58 gathr/views/resource.py:69
 msgid "Add ${something}"
 msgstr "Aggiungere ${something}"
 
-#: gathr/views/resource.py:67
+#: gathr/views/resource.py:59
+msgid "Create ${something}"
+msgstr "Creare ${something}"
+
+#: gathr/views/resource.py:60
+msgid "${something} ID"
+msgstr "${something} id"
+
+#: gathr/views/resource.py:75
 msgid "Add"
 msgstr "Aggiungere"
 
-#: gathr/views/resource.py:161
+#: gathr/views/resource.py:169
 msgid "Manage permissions: ${title}"
 msgstr "Gestire Diritti: ${title}"
 
@@ -184,4 +188,12 @@ msgstr "Membri eriditati dai livelli più alti"
 #: gathr/views/templates/manage_permissions.pt:53
 msgid "No inherited members."
 msgstr "Nessuni membri eriditati."
+
+#: gathr/views/templates/manage_users.pt:6
+msgid "Find user..."
+msgstr "Trovare Utente"
+
+#: gathr/views/templates/view_resource.pt:39
+msgid "Close"
+msgstr "Chiudere"
 

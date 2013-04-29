@@ -62,10 +62,9 @@ setup(name='gathr',
           'docs': doc_extras,
       },
       test_suite="gathr.tests",
-      message_extractors = { 'gathr': [
-                   ('**.py',   'lingua_python', None ),
-                   ('**.pt',   'lingua_xml', None ),
-                   ('**.yaml', 'gathr_metadata', None),
+      message_extractors = {'gathr': [
+                   ('**.py', 'lingua_python', None ),
+                   ('**.pt', 'lingua_xml', None ),
                    ]},
       entry_points="""\
       [paste.app_factory]
