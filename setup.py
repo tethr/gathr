@@ -65,11 +65,13 @@ setup(name='gathr',
       message_extractors = { 'gathr': [
                    ('**.py',   'lingua_python', None ),
                    ('**.pt',   'lingua_xml', None ),
+                   ('**.yaml', 'gathr_metadata', None),
                    ]},
       entry_points="""\
       [paste.app_factory]
       main = gathr.application:main
       [console_scripts]
       create_admin_user = gathr.scripts.create_admin_user:main
-      i18n = gathr.scripts.i18n:main
+      [babel.extractors]
+      gathr_metadata = gathr.metadata:extract_messages
       """)

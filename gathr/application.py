@@ -1,4 +1,5 @@
 import deform
+import os
 import pkg_resources
 import transaction
 from churro import Churro
@@ -32,7 +33,12 @@ def main(global_config, **config):
     config.add_static_view('/static', 'gathr.views:static')
     config.set_session_factory(
         UnencryptedCookieSessionFactoryConfig(settings['secret']))
-    config.add_translation_dirs("gathr:locale")
+    metadata_folder = os.path.dirname(os.path.abspath(settings['metadata']))
+    translation_folder = os.path.join(metadata_folder, 'locale')
+    translation_dirs = ["gathr:locale"]
+    if os.path.exists(translation_folder):
+        translation_dirs.append(translation_folder)
+    config.add_translation_dirs(*translation_dirs)
     config.scan()
     add_deform_search_path()
     return config.make_wsgi_app()

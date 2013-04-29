@@ -1,6 +1,7 @@
 import transaction
 
 from pyramid.httpexceptions import HTTPFound
+from pyramid.i18n import get_localizer
 from pyramid.i18n import TranslationStringFactory
 from pyramid.security import has_permission
 from pyramid.traversal import resource_path
@@ -58,8 +59,10 @@ def view_resource(context, request):
 
     if add_types:
         if len(add_types) == 1:
+            localizer = get_localizer(request)
+            something = localizer.translate(add_types[0]['title'])
             add_types[0]['title'] = _(
-                "Add ${something}", mapping={'something': add_types[0]['title']}
+                "Add ${something}", mapping={'something': something}
             )
             actions.append(add_types[0])
         else:

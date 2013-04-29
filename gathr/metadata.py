@@ -3,7 +3,6 @@ import csv
 import datetime
 import deform.widget
 import imp
-import os
 import sys
 import yaml
 
@@ -24,7 +23,6 @@ from pyramid.i18n import TranslationString
 from pyramid.i18n import TranslationStringFactory
 from pyramid.path import DottedNameResolver
 from pyramid.security import Allow
-from pyramid.threadlocal import get_current_registry
 from pyramid.traversal import resource_path
 
 from .security import GROUPS
@@ -38,14 +36,14 @@ _ = TranslationStringFactory('gathr')
 
 class Metadata(object):
 
-    def __init__(self, folder, filename='gathr.yaml',
-                 dynamic_package='gathr.dynamic'):
-        self.folder = folder
+    def __init__(self, fileobj, dynamic_package='gathr.dynamic'):
         self.datastreams = {}
         self.classes = {}
         self.dynamic_package = dynamic_package
         self.messages = []
-        yaml_data = yaml.load(open(os.path.join(folder, filename)))
+        if isinstance(fileobj, basestring):
+            fileobj = open(fileobj)
+        yaml_data = yaml.load(fileobj)
         self.i18n_domain = yaml_data.pop('i18n_domain', 'gathr_metadata')
         self.i18n_message = MessageFactory(self.i18n_domain, self.messages)
         self.load_datastreams(yaml_data.pop('datastreams', None))
@@ -477,3 +475,16 @@ class MessageFactory(object):
         message = self.factory(*args, **kw)
         self.messages.append(message)
         return message
+
+
+def extract_messages(fileobj, keywords, comment_tags, options):
+    metadata = Metadata(fileobj)
+    messages = []
+    for message in metadata.messages:
+        default = message.default
+        if default:
+            comments = (u'Default: %s' % default,)
+        else:
+            comments = ()
+        messages.append((0, None, message, comments))
+    return messages
