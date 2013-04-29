@@ -18,7 +18,10 @@ _ = TranslationStringFactory('gathr')
 
 @view_config(context=Form, renderer='templates/form.pt', permission=READ)
 def form(context, request):
-    form = deform.Form(context.schema(), buttons=(_('Save changes'),))
+    form = deform.Form(
+        context.schema(),
+        buttons=(deform.form.Button('save', title=_('Save changes')),)
+    )
     editable = has_permission(WRITE, context, request)
     if editable and request.method == 'POST':
         try:
